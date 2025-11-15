@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPB Nordestina Quiz</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Old+Standard+TT&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <div id="login-screen" class="screen active">
+        <h2>Acesso ao Quiz</h2>
+        <input type="password" id="password-input" placeholder="Insira Sua Senha">
+        <button id="login-button">Entrar</button>
+        <p id="login-error" class="error"></p>
+    </div>
+
+    <div id="player-setup-screen" class="screen">
+        <h2>Configurar Perfil</h2>
+        
+        <label for="player-name">Seu Nome (ID):</label>
+        <input type="text" id="player-name" placeholder="Ex: Maria">
+        
+        <label>Selecione a Cor do seu Nome:</label>
+        <div id="color-selection-container">
+            <button class="color-option" data-color="#D32F2F" style="background-color: #D32F2F;"></button>
+            <button class="color-option" data-color="#5D4037" style="background-color: #5D4037;"></button> 
+            <button class="color-option" data-color="#1B5E20" style="background-color: #1B5E20;"></button> 
+            <button class="color-option" data-color="#1565C0" style="background-color: #1565C0;"></button>
+            <button class="color-option" data-color="#FFC107" style="background-color: #FFC107;"></button> 
+            <button class="color-option" data-color="#8E24AA" style="background-color: #8E24AA;"></button> 
+            <button class="color-option" data-color="#00ACC1" style="background-color: #00ACC1;"></button> 
+            <button class="color-option" data-color="#F4511E" style="background-color: #F4511E;"></button>
+            <button class="color-option" data-color="#AD1457" style="background-color: #AD1457;"></button>
+            <button class="color-option" data-color="#7CB342" style="background-color: #7CB342;"></button>
+            <button class="color-option" data-color="#9a6fd6" style="background-color: #9a6fd6;"></button>
+            <button class="color-option" data-color="#4CAF50" style="background-color: #4CAF50;"></button> 
+            <button class="color-option" data-color="#7da8a2" style="background-color: #7da8a2;"></button>
+            <button class="color-option" data-color="#00BCD4" style="background-color: #00BCD4;"></button> 
+            <button class="color-option" data-color="#E91E63" style="background-color: #E91E63;"></button> 
+            <button class="color-option" data-color="#607D8B" style="background-color: #607D8B;"></button> 
+            <button class="color-option" data-color="#BDBDBD" style="background-color: #BDBDBD;"></button>
+            <button class="color-option" data-color="#000000" style="background-color: #000000;"></button> 
+            <button class="color-option" data-color="#FFFFFF" style="background-color: #FFFFFF; border: 1px solid #000;"></button>
+            <button class="color-option" data-color="#C51162" style="background-color: #C51162;"></button>
+            <button class="color-option" data-color="#26A69A" style="background-color: #26A69A;"></button> 
+            
+        </div>
+
+
+        
+        <div class="avatar-preview-container">
+            <p>Pré-visualização do Nome:</p>
+            <span id="name-preview" style="font-size: 1.5em; font-weight: bold;">[Seu Nome Aqui]</span>
+        </div>
+        
+        <button id="join-game-button">Entrar no Jogo</button>
+    </div>
+
+    <div id="waiting-room-screen" class="screen">
+        <h2>Sala de Espera</h2>
+        <p>Aguardando o Administrador iniciar o jogo...</p>
+        <div class="loader"></div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <h2 id="quiz-title">MPB Nordestina Quiz - Nível 1 (Fácil)</h2>
+        <div id="timer-display">Tempo restante: <span id="time-left">40</span> segundos</div>
+        <form id="quiz-form">
+            
+            <div id="level-1-questions" class="level-group active">
+                <div class="question" id="q1-group">
+                    <p>1. Quem é conhecido como o "Rei do Baião", nome importante para a MPB Nordestina?</p>
+                    <label><input type="radio" name="q1" value="c"> c) Luiz Gonzaga</label>
+                    <label><input type="radio" name="q1" value="a"> a) Zé Ramalho</label>
+                    <label><input type="radio" name="q1" value="b"> b) Geraldo Azevedo</label>
+                    <label><input type="radio" name="q1" value="d"> d) Alceu Valença</label>
+                </div>
+
+                <div class="question" id="q2-group">
+                    <p>2. Qual destes artistas é o único que NÃO nasceu na região Nordeste?</p>
+                    <label><input type="radio" name="q2" value="c"> c) Chico Buarque</label>
+                    <label><input type="radio" name="q2" value="a"> a) Chico Science</label>
+                    <label><input type="radio" name="q2" value="b"> b) Gilberto Gil</label>
+                    <label><input type="radio" name="q2" value="d"> d) Caetano Veloso</label>
+                </div>
+
+                <div class="question" id="q3-group">
+                    <p>3. A canção "Canteiros", um clássico da MPB Nordestina, é famosa na voz de qual artista cearense?</p>
+                    <label><input type="radio" name="q3" value="a"> a) Fagner</label>
+                    <label><input type="radio" name="q3" value="b"> b) Belchior</label>
+                    <label><input type="radio" name="q3" value="c"> c) Dominguinhos</label>
+                    <label><input type="radio" name="q3" value="d"> d) Nando Cordel</label>
+                </div>
+            </div>
+
+            <div id="level-2-questions" class="level-group">
+                <div class="question" id="q4-group">
+                    <p>4. Qual estado nordestino é o berço do movimento Manguebeat, liderado por Chico Science?</p>
+                    <label><input type="radio" name="q4" value="b"> b) Pernambuco</label>
+                    <label><input type="radio" name="q4" value="a"> a) Bahia</label>
+                    <label><input type="radio" name="q4" value="c"> c) Ceará</label>
+                    <label><input type="radio" name="q4" value="d"> d) Paraíba</label>
+                </div>
+
+                <div class="question" id="q5-group">
+                    <p>5. O artista Zé Ramalho é famoso por qual de seus álbuns, que contém a faixa "Avohai"?</p>
+                    <label><input type="radio" name="q5" value="d"> d) Ramalho</label>
+                    <label><input type="radio" name="q5" value="a"> a) Paêbirú</label>
+                    <label><input type="radio" name="q5" value="b"> b) Força Estranha</label>
+                    <label><input type="radio" name="q5" value="c"> c) A Terceira Lâmina</label>
+                </div>
+
+                <div class="question" id="q6-group">
+                    <label for="q6">6. QUESTÃO ESCRITA: Qual o nome do compositor e cantor baiano que é considerado um dos maiores expoentes do Tropicalismo?</label>
+                    <input type="text" id="q6" name="q6" required>
+                </div>
+
+                <div class="question" id="q7-group">
+                    <label for="q7">7. QUESTÃO ESCRITA: Cite dois instrumentos essenciais do Forró, ritmos base da MPB Nordestina.</label>
+                    <input type="text" id="q7" name="q7" required>
+                </div>
+            </div>
+
+            <div id="level-3-questions" class="level-group">
+                
+                <div class="question" id="q8-group">
+                    <p>8. Qual instrumento musical Jackson do Pandeiro, de Alagoas, ajudou a popularizar na MPB Nordestina?</p>
+                    <label><input type="radio" name="q8" value="b"> b) Pandeiro</label>
+                    <label><input type="radio" name="q8" value="a"> a) Sanfona</label>
+                    <label><input type="radio" name="q8" value="c"> c) Triângulo</label>
+                    <label><input type="radio" name="q8" value="d"> d) Cavaquinho</label>
+                </div>
+
+                <div class="question" id="q9-group">
+                    <label for="q9">9. QUESTÃO ESCRITA: Complete a letra famosa de Gilberto Gil: "Aquele abraço pro Rio, **\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_**".</label>
+                    <input type="text" id="q9" name="q9" required>
+                </div>
+                
+                <div class="question image-question-group">
+                    <p>Observe a imagem a seguir e responda as perguntas 10 e 11:</p>
+                    <img id="question-image" src="https://via.placeholder.com/300/600075/FFFFFF?text=Imagem+da+Questao" alt="Imagem da Questão" style="width: 100%; max-width: 400px; height: auto; margin: 10px auto; display: block; border: 2px solid #a1887f;">
+                </div>
+
+                <div class="question" id="q10-group">
+                    <p>10. (IMAGEM) O artista central nesta foto é um dos fundadores do Tropicalismo. Quem é ele?</p>
+                    <label><input type="radio" name="q10" value="b"> b) Caetano Veloso</label>
+                    <label><input type="radio" name="q10" value="a"> a) Zé Keti</label>
+                    <label><input type="radio" name="q10" value="c"> c) João Gilberto</label>
+                    <label><input type="radio" name="q10" value="d"> d) Tom Zé</label>
+                </div>
+                
+                <div class="question" id="q11-group">
+                    <label for="q11">11. (IMAGEM/ESCRITA) Qual o nome de uma famosa canção política deste artista (Caetano Veloso)?</label>
+                    <input type="text" id="q11" name="q11" required>
+                </div>
+                
+                <div class="question captcha-lock-group" id="q12-group">
+                    <p>12. CAPTCHA LOCK: Para enviar as respostas, insira o número de **PERGUNTAS** que o Nível 2 (Médio) possui.</p>
+                    <input type="text" id="q12" name="q12" placeholder="Número de perguntas">
+                </div>
+                
+            </div>
+            
+            <button type="submit" id="submit-level-button">Próximo Nível / Enviar Respostas</button>
+        </form>
+    </div>
+
+    <div id="captcha-screen" class="screen">
+        <h2>Você concluiu o Quiz! Responda o CAPTCHA Final para pontuar.</h2>
+        <p>Jogador: <strong id="captcha-player-id"></strong></p>
+        
+        <div class="captcha-text">
+            <p>"A MPB Nordestina é rica e diversa. Artistas como Luiz Gonzaga, o Rei do Baião (1912-1989), de Pernambuco, Elba Ramalho, da Paraíba, e Gilberto Gil, da Bahia, ajudaram a formar o seu pilar. O Tropicalismo (iniciado em 1968) também bebeu dessa fonte, especialmente com Gil e Caetano. O movimento **Manguebeat** (surgido em 1991) mesclou ritmos regionais com rock, sendo um marco na cena de **Recife**."</p>
+        </div>
+
+        <div id="captcha-questions">
+            <p><strong>Questão 1:</strong> Qual o ano de nascimento de Luiz Gonzaga?</p>
+            <input type="text" id="captcha-q1" placeholder="Ano">
+
+            <p><strong>Questão 2:</strong> Cite o nome de dois dos estados nordestinos citados no texto.</p>
+            <select id="captcha-q2-1">
+                <option value="">Estado 1</option>
+                <option value="pernambuco">Pernambuco</option>
+                <option value="paraiba">Paraíba</option>
+                <option value="bahia">Bahia</option>
+                <option value="ceara">Ceará</option>
+            </select>
+            <select id="captcha-q2-2">
+                <option value="">Estado 2</option>
+                <option value="pernambuco">Pernambuco</option>
+                <option value="paraiba">Paraíba</option>
+                <option value="bahia">Bahia</option>
+                <option value="ceara">Ceará</option>
+            </select>
+
+            <p><strong>Questão 3:</strong> Qual movimento foi um marco na cena de Recife?</p>
+            <button class="captcha-btn" data-answer="Manguebeat">Manguebeat</button>
+            <button class="captcha-btn" data-answer="Tropicalismo">Tropicalismo</button>
+            <button class="captcha-btn" data-answer="Jovem Guarda">Jovem Guarda</button>
+        </div>
+
+        <button id="submit-captcha">Concluir CAPTCHA</button>
+        <button id="request-hint">Solicitar ajuda ao Admin (custa pontos)</button>
+    </div>
+
+    <div id="scoreboard-screen" class="screen">
+        <h2>Placar Final</h2>
+        <h3>Top 3</h3>
+        <ol id="top-3-list">
+            </ol>
+        <h3>Todos os Jogadores</h3>
+        <table id="full-scoreboard">
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>Jogador</th>
+                    <th>Cor</th>
+                    <th>Pontos</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="full-scoreboard-body">
+                </tbody>
+        </table>
+        <button id="back-to-admin">Voltar (Admin)</button>
+    </div>
+
+    <div id="admin-panel-screen" class="screen">
+        <h2>Modo Administrador</h2>
+        <button id="start-game-button">1. Iniciar o Jogo</button>
+        <button id="view-scoreboard-button">2. Acompanhar Placar</button>
+        
+        <div class="admin-section">
+            <h3>3. Gerenciar Jogadores</h3>
+            <select id="admin-player-list">
+                <option value="">Selecione um jogador</option>
+            </select>
+            <button id="admin-ban-button">Banir</button>
+            <button id="admin-punish-button">Punir (-5 pontos)</button>
+        </div>
+
+        <div class="admin-section">
+            <h3>4. Auxiliar Jogadores (Dicas)</h3>
+            <p>Pedidos de Dica (clique para responder):</p>
+            <ul id="admin-hint-requests">
+                </ul>
+            <input type="text" id="admin-hint-prompt" placeholder="Digite a dica para o jogador selecionado...">
+            <button id="admin-send-hint-button">Enviar Dica</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
