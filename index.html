@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPB Nordestina Quiz</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Old+Standard+TT&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <div id="login-screen" class="screen active">
+        <h2>Acesso ao Quiz</h2>
+        <input type="password" id="password-input" placeholder="Insira Sua Senha">
+        <button id="login-button">Entrar</button>
+        <p id="login-error" class="error"></p>
+    </div>
+
+    <div id="player-setup-screen" class="screen">
+        <h2>Configurar Perfil</h2>
+        
+        <label for="player-name">Seu Nome (ID):</label>
+        <input type="text" id="player-name" placeholder="Ex: Maria">
+        
+        <label>Selecione a Cor do seu Nome:</label>
+        <div id="color-selection-container">
+            <button class="color-option" data-color="#D32F2F" style="background-color: #D32F2F;"></button>
+            <button class="color-option" data-color="#5D4037" style="background-color: #5D4037;"></button> 
+            <button class="color-option" data-color="#1B5E20" style="background-color: #1B5E20;"></button> 
+            <button class="color-option" data-color="#1565C0" style="background-color: #1565C0;"></button>
+            <button class="color-option" data-color="#FFC107" style="background-color: #FFC107;"></button> 
+            <button class="color-option" data-color="#8E24AA" style="background-color: #8E24AA;"></button> 
+            <button class="color-option" data-color="#00ACC1" style="background-color: #00ACC1;"></button> 
+            <button class="color-option" data-color="#F4511E" style="background-color: #F4511E;"></button>
+            <button class="color-option" data-color="#AD1457" style="background-color: #AD1457;"></button>
+            <button class="color-option" data-color="#7CB342" style="background-color: #7CB342;"></button>
+            <button class="color-option" data-color="#9a6fd6" style="background-color: #9a6fd6;"></button>
+            <button class="color-option" data-color="#4CAF50" style="background-color: #4CAF50;"></button> 
+            <button class="color-option" data-color="#7da8a2" style="background-color: #7da8a2;"></button>
+            <button class="color-option" data-color="#00BCD4" style="background-color: #00BCD4;"></button> 
+            <button class="color-option" data-color="#E91E63" style="background-color: #E91E63;"></button> 
+            <button class="color-option" data-color="#607D8B" style="background-color: #607D8B;"></button> 
+            <button class="color-option" data-color="#BDBDBD" style="background-color: #BDBDBD;"></button>
+            <button class="color-option" data-color="#000000" style="background-color: #000000;"></button> 
+            <button class="color-option" data-color="#FFFFFF" style="background-color: #FFFFFF; border: 1px solid #000;"></button>
+            <button class="color-option" data-color="#C51162" style="background-color: #C51162;"></button>
+            <button class="color-option" data-color="#26A69A" style="background-color: #26A69A;"></button> 
+        </div>
+        
+        <div class="avatar-preview-container">
+            <p>Pré-visualização do Nome:</p>
+            <span id="name-preview" style="font-size: 1.5em; font-weight: bold;">[Seu Nome Aqui]</span>
+        </div>
+        
+        <button id="join-game-button">Entrar no Jogo</button>
+    </div>
+
+    <div id="presenter-setup-screen" class="screen">
+        <h2>Configurar Apresentador</h2>
+        <label for="presenter-name">Seu Nome:</label>
+        <input type="text" id="presenter-name" placeholder="Ex: Professor João">
+        
+        <label>Selecione a Cor do seu Nome (Opcional):</label>
+        <div id="presenter-color-selection" class="color-selection-container">
+            <button class="color-option presenter-color-option" data-color="#D32F2F" style="background-color: #D32F2F;"></button>
+            <button class="color-option presenter-color-option" data-color="#5D4037" style="background-color: #5D4037;"></button> 
+            <button class="color-option presenter-color-option" data-color="#1B5E20" style="background-color: #1B5E20;"></button> 
+            <button class="color-option presenter-color-option" data-color="#1565C0" style="background-color: #1565C0;"></button>
+            <button class="color-option presenter-color-option" data-color="#FFC107" style="background-color: #FFC107;"></button> 
+            <button class="color-option presenter-color-option" data-color="#8E24AA" style="background-color: #8E24AA;"></button> 
+            <button class="color-option presenter-color-option" data-color="#00ACC1" style="background-color: #00ACC1;"></button> 
+            <button class="color-option presenter-color-option" data-color="#F4511E" style="background-color: #F4511E;"></button>
+            <button class="color-option presenter-color-option" data-color="#AD1457" style="background-color: #AD1457;"></button>
+            <button class="color-option presenter-color-option" data-color="#7CB342" style="background-color: #7CB342;"></button>
+            <button class="color-option presenter-color-option" data-color="#9a6fd6" style="background-color: #9a6fd6;"></button>
+            <button class="color-option presenter-color-option" data-color="#4CAF50" style="background-color: #4CAF50;"></button> 
+            <button class="color-option presenter-color-option" data-color="#7da8a2" style="background-color: #7da8a2;"></button>
+            <button class="color-option presenter-color-option" data-color="#00BCD4" style="background-color: #00BCD4;"></button> 
+            <button class="color-option presenter-color-option" data-color="#E91E63" style="background-color: #E91E63;"></button> 
+            <button class="color-option presenter-color-option" data-color="#607D8B" style="background-color: #607D8B;"></button> 
+            <button class="color-option presenter-color-option" data-color="#BDBDBD" style="background-color: #BDBDBD;"></button>
+            <button class="color-option presenter-color-option" data-color="#000000" style="background-color: #000000;"></button> 
+            <button class="color-option presenter-color-option" data-color="#FFFFFF" style="background-color: #FFFFFF; border: 1px solid #000;"></button>
+            <button class="color-option presenter-color-option" data-color="#C51162" style="background-color: #C51162;"></button>
+            <button class="color-option presenter-color-option" data-color="#26A69A" style="background-color: #26A69A;"></button> 
+        </div>
+
+        <div class="avatar-preview-container">
+            <p>Pré-visualização:</p>
+            <span id="presenter-name-preview" style="font-size: 1.5em; font-weight: bold;">[Apresentador Aqui]</span>
+        </div>
+        
+        <button id="join-presenter-button">Iniciar Painel Apresentador</button>
+    </div>
+    
+    <div id="presenter-panel-screen" class="screen">
+        <h2>🎤 Painel do Apresentador (<span id="presenter-id-display"></span>)</h2>
+        <div class="presenter-section">
+            <h3>1. Escolher a Próxima Pergunta</h3>
+            <label for="level-select">Nível:</label>
+            <select id="level-select">
+                <option value="1">Nível 1 (Fácil)</option>
+                <option value="2">Nível 2 (Médio)</option>
+                <option value="3">Nível 3 (Difícil)</option>
+            </select>
+            <label for="question-select">Pergunta:</label>
+            <select id="question-select">
+                <option value="">Selecione um Nível Primeiro</option>
+            </select>
+            <input type="number" id="timer-duration" placeholder="Tempo (segundos, ex: 30)" value="30" min="5">
+            <button id="publish-question-button">Publicar Pergunta e Iniciar Votação</button>
+        </div>
+        
+        <div class="presenter-section">
+            <h3>2. Visualização em Tempo Real</h3>
+            <p><strong>Status do Jogo:</strong> <span id="game-status-display">Aguardando</span></p>
+            <p><strong>Votos Recebidos:</strong> <span id="vote-count-display">0</span></p>
+            <p><strong>Votos por Opção:</strong> <span id="vote-results-display">A: 0, B: 0, C: 0, D: 0</span></p>
+            <button id="show-answer-button" disabled>Revelar Resposta e Pontuar</button>
+        </div>
+
+        <div class="admin-section">
+            <h3>3. Gerenciar Jogadores / Dicas</h3>
+            <select id="presenter-player-list">
+                <option value="">Selecione um jogador</option>
+            </select>
+            <button id="presenter-ban-button" disabled>Banir (Solicitação)</button>
+            <button id="presenter-punish-button" disabled>Punir (-5 pontos) (Solicitação)</button>
+            <button id="presenter-request-hint-button">Solicitar Dica ao Admin (Custa 5 pts)</button>
+        </div>
+        <button id="presenter-view-scoreboard">Ver Placar Completo</button>
+    </div>
+
+    <div id="waiting-room-screen" class="screen">
+        <h2>Sala de Espera</h2>
+        <p id="waiting-message">Aguardando o Administrador iniciar o jogo...</p>
+        <div class="loader"></div>
+        </div>
+
+    <div id="game-screen" class="screen">
+        <h2 id="quiz-title">MPB Nordestina Quiz</h2>
+        
+        <div id="timer-display">Tempo restante: <span id="time-left">0</span> segundos</div>
+        
+        <form id="quiz-form">
+            <div id="voting-group" class="level-group active">
+                <p class="question-placeholder">Pergunta será publicada pelo apresentador.</p>
+                <label><input type="radio" name="player-vote" value="a" disabled> A)</label>
+                <label><input type="radio" name="player-vote" value="b" disabled> B)</label>
+                <label><input type="radio" name="player-vote" value="c" disabled> C)</label>
+                <label><input type="radio" name="player-vote" value="d" disabled> D)</label>
+            </div>
+            
+            <button type="submit" id="submit-vote-button" disabled>VOTAR</button>
+            
+            <button type="button" id="request-hint-player" class="small-btn">Solicitar ajuda ao Admin (custa 5 pontos)</button>
+        </form>
+    </div>
+
+    <div id="captcha-screen" class="screen">
+        <h2>Você concluiu o Quiz! Responda o CAPTCHA Final para pontuar.</h2>
+        <p>Jogador: <strong id="captcha-player-id"></strong></p>
+        
+        <div class="captcha-text">
+            <p>"A MPB Nordestina é rica e diversa. Artistas como Luiz Gonzaga, o Rei do Baião (1912-1989), de Pernambuco, Elba Ramalho, da Paraíba, e Gilberto Gil, da Bahia, ajudaram a formar o seu pilar. O Tropicalismo (iniciado em 1968) também bebeu dessa fonte, especialmente com Gil e Caetano. O movimento **Manguebeat** (surgido em 1991) mesclou ritmos regionais com rock, sendo um marco na cena de **Recife**."</p>
+        </div>
+
+        <div id="captcha-questions">
+            <p><strong>Questão 1:</strong> Qual o ano de nascimento de Luiz Gonzaga?</p>
+            <input type="text" id="captcha-q1" placeholder="Ano">
+
+            <p><strong>Questão 2:</strong> Cite o nome de dois dos estados nordestinos citados no texto.</p>
+            <select id="captcha-q2-1">
+                <option value="">Estado 1</option>
+                <option value="pernambuco">Pernambuco</option>
+                <option value="paraiba">Paraíba</option>
+                <option value="bahia">Bahia</option>
+                <option value="ceara">Ceará</option>
+            </select>
+            <select id="captcha-q2-2">
+                <option value="">Estado 2</option>
+                <option value="pernambuco">Pernambuco</option>
+                <option value="paraiba">Paraíba</option>
+                <option value="bahia">Bahia</option>
+                <option value="ceara">Ceará</option>
+            </select>
+
+            <p><strong>Questão 3:</strong> Qual movimento foi um marco na cena de Recife?</p>
+            <button class="captcha-btn" data-answer="Manguebeat">Manguebeat</button>
+            <button class="captcha-btn" data-answer="Tropicalismo">Tropicalismo</button>
+            <button class="captcha-btn" data-answer="Jovem Guarda">Jovem Guarda</button>
+        </div>
+
+        <button id="submit-captcha">Concluir CAPTCHA</button>
+    </div>
+
+    <div id="scoreboard-screen" class="screen">
+        <h2>Placar Final</h2>
+        <h3>Top 3</h3>
+        <ol id="top-3-list">
+            </ol>
+        <h3>Todos os Jogadores</h3>
+        <table id="full-scoreboard">
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>Jogador</th>
+                    <th>Cor</th>
+                    <th>Pontos</th>
+                    <th>Status (Perfil)</th>
+                </tr>
+            </thead>
+            <tbody id="full-scoreboard-body">
+                </tbody>
+        </table>
+        <button id="back-to-admin">Voltar</button>
+    </div>
+
+    <div id="admin-panel-screen" class="screen">
+        <h2>🛠️ Modo Administrador</h2>
+        <p>Use a senha 'seminario'</p>
+        <button id="start-game-button">1. Iniciar o Jogo (Libera o Apresentador)</button>
+        <button id="view-scoreboard-button">2. Acompanhar Placar</button>
+        
+        <div class="admin-section">
+            <h3>3. Gerenciar Jogadores (Banir / Punir)</h3>
+            <select id="admin-player-list">
+                <option value="">Selecione um jogador/apresentador</option>
+            </select>
+            <button id="admin-ban-button">Banir (Apagar Conta)</button>
+            <button id="admin-punish-button">Punir (-5 pontos)</button>
+        </div>
+
+        <div class="admin-section">
+            <h3>4. Auxiliar Apresentadores/Jogadores (Dicas)</h3>
+            <p>Pedidos de Dica (clique para responder):</p>
+            <ul id="admin-hint-requests">
+                </ul>
+            <input type="text" id="admin-hint-prompt" placeholder="Digite a dica para o jogador/apresentador selecionado...">
+            <button id="admin-send-hint-button">Enviar Dica</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
