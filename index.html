@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mercado Simulator V4 - Expedientes & Mobile</title>
+    <title>Mercado Simulator</title>
     <style>
         :root {
             --bg-dark: #11111b;
@@ -17,6 +17,7 @@
             --dirt: #948279;
             --text: #cdd6f4;
             --text-muted: #7f849c;
+            --purple-dark: #181825;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -24,8 +25,8 @@
 
         /* Sidebar / Menu Lateral */
         nav#sidebar {
-            width: 120px;
-            background-color: #181825;
+            width: 130px;
+            background-color: var(--purple-dark);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -36,9 +37,10 @@
 
         .tab-btn {
             background: none; border: none; color: var(--text-muted);
-            padding: 20px 0; width: 100%; cursor: pointer;
-            font-weight: bold; font-size: 12px; text-transform: uppercase;
+            padding: 18px 0; width: 100%; cursor: pointer;
+            font-weight: bold; font-size: 11px; text-transform: uppercase;
             transition: 0.2s; border-left: 4px solid transparent;
+            text-align: center;
         }
 
         .tab-btn:hover, .tab-btn.active {
@@ -51,17 +53,17 @@
 
         /* Header / Topbar */
         header#status-bar {
-            background-color: var(--bg-panel); padding: 15px 20px;
+            background-color: var(--bg-panel); padding: 12px 20px;
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 5; flex-wrap: wrap; gap: 10px;
         }
 
         .status-group { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
         .money { color: var(--success); font-size: 20px; font-weight: 900; }
-        .level-badge { background: var(--primary); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 14px;}
-        .day-badge { background: var(--warning); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 14px;}
+        .level-badge { background: var(--primary); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 13px;}
+        .day-badge { background: var(--warning); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 13px;}
         
-        .progress-container { display: flex; flex-direction: column; width: 100px; }
+        .progress-container { display: flex; flex-direction: column; width: 110px; }
         .progress-container span { font-size: 11px; color: var(--text-muted); margin-bottom: 2px;}
         
         progress { width: 100%; height: 10px; border-radius: 5px; appearance: none; }
@@ -73,54 +75,70 @@
         progress.patience-bar.med::-webkit-progress-value { background-color: var(--warning); }
         progress.time-bar::-webkit-progress-value { background-color: var(--warning); border-radius: 5px; transition: 1s linear; }
 
-        .clean-btn { background: var(--dirt); color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-top: 2px;}
+        .clean-btn { background: var(--dirt); color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; transition: 0.2s;}
+        .clean-btn:hover { filter: brightness(1.2); }
 
-        /* Views (Abas) */
-        section.view { display: none; padding: 20px; height: 100%; overflow-y: auto; padding-bottom: 80px; }
+        /* Seções de Abas */
+        section.view { display: none; padding: 20px; height: 100%; overflow-y: auto; padding-bottom: 100px; }
         section.view.active { display: block; }
-        h2 { margin-bottom: 5px; color: var(--primary); font-size: 22px; }
+        h2 { margin-bottom: 2px; color: var(--primary); font-size: 24px; }
         .subtitle { color: var(--text-muted); margin-bottom: 15px; font-size: 13px; }
+
+        /* Notificação de Buffs Ativos */
+        .buff-container { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        .buff-badge { background: var(--bg-card); border: 1px solid var(--secondary); padding: 4px 8px; border-radius: 6px; font-size: 11px; color: var(--secondary); }
 
         /* Botões Globais */
         button { cursor: pointer; border-radius: 6px; border: none; font-weight: bold; transition: 0.2s; }
         button:active { transform: scale(0.95); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
-        .btn-action { background-color: var(--primary); color: #000; padding: 10px; width: 100%; margin-top: 10px; font-size: 14px;}
+        button:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
+        .btn-action { background-color: var(--primary); color: #000; padding: 8px; width: 100%; margin-top: 8px; font-size: 13px;}
         .btn-success { background-color: var(--success); color: #000; padding: 10px; width: 100%; font-size: 16px; margin-top: 15px;}
-        .btn-expediente { background-color: var(--warning); color: #000; padding: 8px 15px; border-radius: 20px; font-size: 14px; box-shadow: 0 0 10px rgba(249, 226, 175, 0.4); }
-        .btn-expediente.ativo { background-color: var(--danger); color: #fff; box-shadow: 0 0 10px rgba(243, 139, 168, 0.4); }
+        .btn-expediente { background-color: var(--warning); color: #000; padding: 8px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+        .btn-expediente.ativo { background-color: var(--danger); color: #fff; }
 
         /* Grid de Itens */
-        .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-        .item-card { background-color: var(--bg-card); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #444; position: relative; }
-        .item-card.locked { opacity: 0.5; filter: grayscale(100%); border-color: var(--danger); }
-        .item-card .lock-tag { position: absolute; top: -10px; right: -10px; background: var(--danger); color: #000; font-size: 11px; padding: 3px 8px; border-radius: 10px; font-weight: bold;}
-        .item-card strong { display: block; font-size: 16px; color: #fff; margin-bottom: 5px;}
+        .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+        .item-card { background-color: var(--bg-card); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #444; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+        .item-card.locked { opacity: 0.4; filter: grayscale(100%); border-color: var(--danger); }
+        .item-card .lock-tag { position: absolute; top: -8px; right: -8px; background: var(--danger); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 8px; font-weight: bold;}
+        .item-card strong { display: block; font-size: 15px; color: #fff; margin-bottom: 4px;}
         .item-card span { display: block; margin: 2px 0; font-size: 12px; color: var(--text-muted); }
-        .item-card mark { background: #444; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+        .item-card mark { background: #222; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: monospace; }
 
         /* Layout do Caixa */
-        .caixa-container { display: flex; gap: 15px; flex-direction: row; height: calc(100% - 100px); }
+        .caixa-container { display: flex; gap: 15px; flex-direction: row; height: calc(100% - 80px); }
         .fila-panel, .atendimento-panel { background: var(--bg-panel); border-radius: 10px; padding: 15px; display: flex; flex-direction: column;}
         .fila-panel { width: 35%; overflow-y: auto; }
         .atendimento-panel { width: 65%; }
         
-        .cliente-card { background: var(--bg-card); padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; border-left: 4px solid var(--warning); }
+        .cliente-card { background: var(--bg-card); padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; border-left: 4px solid var(--warning); }
         .cliente-info { display: flex; justify-content: space-between; align-items: center; }
-        .cliente-info button { background: var(--warning); color: #000; padding: 5px 10px; }
+        .cliente-info button { background: var(--warning); color: #000; padding: 4px 8px; font-size: 12px; }
 
         .sacola-list { list-style: none; margin: 10px 0; flex: 1; overflow-y: auto; padding-right: 5px; }
         .sacola-item { display: flex; justify-content: space-between; background: var(--bg-dark); padding: 8px; border-radius: 6px; margin-bottom: 5px; font-size: 13px;}
         .sacola-item .falta { color: var(--danger); font-weight: bold; }
         
         .checkout-box { background: var(--bg-dark); padding: 15px; border-radius: 8px; border: 1px solid var(--primary); }
-        .checkout-info { display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 5px; }
+        .checkout-info { display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 4px; }
         .troco-input-group { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
         .troco-input-group input { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid var(--primary); background: var(--bg-card); color: #fff; font-size: 16px; outline: none; }
         
+        /* Configurações extras de Funcionários */
+        .sub-config { margin-top: 8px; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 6px; font-size: 11px; text-align: left;}
+        .sub-config select { width: 100%; padding: 4px; background: var(--bg-dark); color: #fff; border: 1px solid #555; border-radius: 4px; margin-top: 4px; font-size: 11px; }
+
         /* Terminal */
-        #terminal-area { width: 100%; height: 100px; background: #000; color: var(--success); font-family: monospace; padding: 10px; border: 1px solid var(--primary); resize: none; border-radius: 8px; font-size: 14px;}
-        #terminal-output { margin-top: 10px; background: #000; padding: 10px; height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px; color: #aaa; border-radius: 8px;}
+        #terminal-area { width: 100%; height: 80px; background: #000; color: var(--success); font-family: monospace; padding: 10px; border: 1px solid var(--primary); resize: none; border-radius: 8px; font-size: 14px;}
+        #terminal-output { margin-top: 10px; background: #000; padding: 10px; height: 160px; overflow-y: auto; font-family: monospace; font-size: 12px; color: #aaa; border-radius: 8px;}
+
+        /* Ajustes Alertas Visuais */
+        .danger-zone { animation: flash-danger 1s infinite alternate; }
+        @keyframes flash-danger {
+            from { border-color: transparent; }
+            to { border-color: var(--danger); box-shadow: 0 0 8px var(--danger); }
+        }
 
         /* --- MEDIA QUERIES PARA MOBILE --- */
         @media (max-width: 768px) {
@@ -128,31 +146,33 @@
             nav#sidebar { 
                 width: 100%; flex-direction: row; padding: 0; border-right: none; 
                 border-top: 2px solid var(--bg-panel); order: 3; height: 60px; z-index: 100;
-                position: fixed; bottom: 0; background-color: #181825;
+                position: fixed; bottom: 0; background-color: var(--purple-dark);
+                justify-content: space-around;
             }
-            .tab-btn { padding: 10px; font-size: 10px; border-left: none; border-top: 4px solid transparent; }
+            .tab-btn { padding: 10px 0; font-size: 9px; border-left: none; border-top: 4px solid transparent; }
             .tab-btn:hover, .tab-btn.active { border-left: none; border-top: 4px solid var(--primary); }
             main#main-content { order: 1; height: calc(100vh - 60px); }
             
-            header#status-bar { justify-content: center; text-align: center; padding: 10px; }
-            .status-group { justify-content: center; gap: 10px; width: 100%; }
-            .progress-container { width: 80px; }
+            header#status-bar { justify-content: center; text-align: center; padding: 8px; gap: 5px; }
+            .status-group { justify-content: center; gap: 8px; width: 100%; }
+            .progress-container { width: 75px; }
+            .money { font-size: 16px; }
 
-            .caixa-container { flex-direction: column; height: auto; }
-            .fila-panel, .atendimento-panel { width: 100%; height: auto; min-height: 250px;}
+            .caixa-container { flex-direction: column; height: auto; overflow-y: auto; }
+            .fila-panel, .atendimento-panel { width: 100%; height: auto; min-height: 200px;}
             
-            section.view { padding: 15px; padding-bottom: 30px;}
+            section.view { padding: 12px; padding-bottom: 80px;}
         }
     </style>
 </head>
 <body>
 
-    <!-- SIDEBAR AGORA VIRA BOTTOM BAR NO MOBILE -->
     <nav id="sidebar">
         <button class="tab-btn active" onclick="switchTab('caixa')">Caixa</button>
         <button class="tab-btn" onclick="switchTab('estoque')">Estoque</button>
         <button class="tab-btn" onclick="switchTab('rh')">Equipe</button>
         <button class="tab-btn" onclick="switchTab('upgrades')">Upgrades</button>
+        <button class="tab-btn" onclick="switchTab('passivas')">Passivas</button>
         <button class="tab-btn" onclick="switchTab('terminal')">Código</button>
     </nav>
 
@@ -162,10 +182,10 @@
                 <span class="day-badge">Dia <span id="dia-display">1</span></span>
                 <span class="level-badge">Nv <span id="nivel-display">1</span></span>
                 <div class="progress-container">
-                    <span>XP: <span id="xp-text">0/100</span></span>
-                    <progress id="xp-bar" class="xp-bar" value="0" max="100"></progress>
+                    <span>XP (<span id="xp-mult-display">1.0</span>x): <span id="xp-text">0/150</span></span>
+                    <progress id="xp-bar" class="xp-bar" value="0" max="150"></progress>
                 </div>
-                <div class="progress-container">
+                <div class="progress-container" id="dirt-wrapper">
                     <span>Sujeira: <span id="dirt-text">0%</span></span>
                     <progress id="dirt-bar" class="dirt-bar" value="0" max="100"></progress>
                 </div>
@@ -173,7 +193,7 @@
             </div>
             <div class="status-group">
                 <button id="btn-expediente" class="btn-expediente" onclick="toggleExpediente()">Abrir Mercado</button>
-                <div class="progress-container" style="width: 80px;">
+                <div class="progress-container" style="width: 70px;">
                     <span id="tempo-texto">Fechado</span>
                     <progress id="expediente-bar" class="time-bar" value="0" max="60"></progress>
                 </div>
@@ -183,14 +203,15 @@
 
         <!-- CAIXA VIEW -->
         <section id="caixa" class="view active">
+            <div class="buff-container" id="buffs-ativos-caixa"></div>
             <h2>Frente de Caixa</h2>
-            <p class="subtitle">Abra o mercado para receber clientes. O caos aumenta no fim do dia!</p>
+            <p class="subtitle">Atenda rápido. Sujeira alta faz a paciência sumir e gera multas diárias!</p>
             
             <div class="caixa-container">
                 <article class="fila-panel">
-                    <h3 style="margin-bottom: 15px; color: var(--warning);">Fila (<span id="fila-count">0</span>/<span id="fila-max">5</span>)</h3>
+                    <h3 style="margin-bottom: 10px; color: var(--warning);">Fila (<span id="fila-count">0</span>/<span id="fila-max">5</span>)</h3>
                     <div id="fila-container">
-                        <p style="color: var(--text-muted); font-size: 13px;">Mercado fechado. Aguardando expediente...</p>
+                        <p style="color: var(--text-muted); font-size: 13px;">Mercado fechado.</p>
                     </div>
                 </article>
 
@@ -217,7 +238,7 @@
                                 <span style="color: var(--warning); font-weight: bold;">R$ <span id="compra-total">0.00</span></span>
                             </div>
                             <div class="checkout-info">
-                                <span>Dinheiro:</span>
+                                <span>Dinheiro do Cliente:</span>
                                 <span style="color: var(--success); font-weight: bold;">R$ <span id="compra-pago">0.00</span></span>
                             </div>
                             
@@ -232,7 +253,7 @@
                                 </div>
                             </div>
                             <div id="checkout-auto" style="display: none; text-align: center; color: var(--success); font-weight: bold; padding: 10px;">
-                                🤖 Operador bipando...
+                                🤖 <span id="caixa-auto-status">Caixas automáticos operando...</span>
                             </div>
                         </div>
                     </div>
@@ -243,37 +264,47 @@
         <!-- ESTOQUE VIEW -->
         <section id="estoque" class="view">
             <h2>Armazém & Fornecedores</h2>
-            <p class="subtitle">Compre mercadorias (Max Nível 10).</p>
+            <p class="subtitle">Monitore as quantidades. Produtos destravam de acordo com seu Nível.</p>
             <div id="estoque-grid" class="item-grid"></div>
         </section>
 
         <!-- RH VIEW -->
         <section id="rh" class="view">
-            <h2>Recursos Humanos</h2>
-            <p class="subtitle">Automatize seu mercado. Eles cobram salário ao final de CADA DIA.</p>
-            <div class="item-grid">
-                <div class="item-card emp-card" id="card-emp-caixa">
-                    <strong>💳 Caixa</strong>
-                    <span>Automatiza vendas e troco.</span>
-                    <span style="color: var(--warning)">Contrato: R$ 300</span>
-                    <span style="color: var(--danger)">Salário/Dia: R$ 50</span>
-                    <button class="btn-action" id="btn-comp-caixa" onclick="contratar('caixa', 300)">Contratar</button>
+            <h2>Gestão de Equipe (RH)</h2>
+            <p class="subtitle">Contrate múltiplos funcionários e melhore as habilidades deles. Salários escalam por nível.</p>
+            <div class="item-grid" id="funcionarios-grid">
+                <!-- Caixa -->
+                <div class="item-card">
+                    <strong>💳 Operadores de Caixa</strong>
+                    <span>Atendimento automático sequencial.</span>
+                    <span id="status-caixas" style="color:var(--success); font-weight:bold;">Contratados: 0</span>
+                    <span id="lvl-caixas" style="color:var(--primary);">Eficiência: Nv 1 (-0.5s cooldown)</span>
+                    <span id="salario-caixas" style="color:var(--danger)">Custo diário total: R$ 0</span>
+                    <button class="btn-action" id="buy-caixa" onclick="contratarFuncionario('caixa')">Contratar (+ R$ <span id="cost-hire-caixa">300</span>)</button>
+                    <button class="btn-action" style="background: var(--secondary); color:#000;" id="up-caixa" onclick="uparFuncionario('caixa')">Upgrade (R$ <span id="cost-up-caixa">200</span>)</button>
                 </div>
-                <div class="item-card emp-card" id="card-emp-zelador">
-                    <strong>🧹 Zelador</strong>
-                    <span>Limpa o mercado (10%/seg).</span>
-                    <span style="color: var(--warning)">Contrato: R$ 250</span>
-                    <span style="color: var(--danger)">Salário/Dia: R$ 40</span>
-                    <button class="btn-action" id="btn-comp-zelador" onclick="contratar('zelador', 250)">Contratar</button>
+                <!-- Zelador -->
+                <div class="item-card">
+                    <strong>🧹 Equipe de Limpeza</strong>
+                    <span>Limpa sujeira passivamente a cada segundo.</span>
+                    <span id="status-zeladores" style="color:var(--success); font-weight:bold;">Contratados: 0</span>
+                    <span id="lvl-zeladores" style="color:var(--primary);">Poder: Nv 1 (1.5%/seg)</span>
+                    <span id="salario-zeladores" style="color:var(--danger)">Custo diário total: R$ 0</span>
+                    <button class="btn-action" id="buy-zelador" onclick="contratarFuncionario('zelador')">Contratar (+ R$ <span id="cost-hire-zelador">250</span>)</button>
+                    <button class="btn-action" style="background: var(--secondary); color:#000;" id="up-zelador" onclick="uparFuncionario('zelador')">Upgrade (R$ <span id="cost-up-zelador">180</span>)</button>
                 </div>
-                <div class="item-card emp-card" id="card-emp-estoquista">
-                    <strong>📦 Estoquista</strong>
-                    <span>Compra 1x item/seg automaticamente.</span>
-                    <span style="color: var(--warning)">Contrato: R$ 400</span>
-                    <span style="color: var(--danger)">Salário/Dia: R$ 60</span>
-                    <button class="btn-action" id="btn-comp-estoquista" onclick="contratar('estoquista', 400)">Contratar</button>
-                    <div class="emp-config" id="config-estoquista" style="display:none;">
-                        <select id="select-estoquista" onchange="mudarAlvoEstoquista(this.value)"></select>
+                <!-- Estoquista -->
+                <div class="item-card">
+                    <strong>📦 Repositores / Estoque</strong>
+                    <span>Compram automaticamente o alvo configurado.</span>
+                    <span id="status-estoquistas" style="color:var(--success); font-weight:bold;">Contratados: 0</span>
+                    <span id="lvl-estoquistas" style="color:var(--primary);">Velocidade: Nv 1 (1 item/seg)</span>
+                    <span id="salario-estoquistas" style="color:var(--danger)">Custo diário total: R$ 0</span>
+                    <button class="btn-action" id="buy-estoquista" onclick="contratarFuncionario('estoquista')">Contratar (+ R$ <span id="cost-hire-estoquista">400</span>)</button>
+                    <button class="btn-action" style="background: var(--secondary); color:#000;" id="up-estoquista" onclick="uparFuncionario('estoquista')">Upgrade (R$ <span id="cost-up-estoquista">300</span>)</button>
+                    
+                    <div id="targets-estoquistas-container" style="margin-top:10px; max-height:120px; overflow-y:auto;">
+                        <!-- Selects dinâmicos de alvos por funcionário -->
                     </div>
                 </div>
             </div>
@@ -281,37 +312,66 @@
 
         <!-- UPGRADES VIEW -->
         <section id="upgrades" class="view">
-            <h2>Melhorias da Loja</h2>
-            <p class="subtitle">Evolua sua infraestrutura para lidar com o caos.</p>
-            <div class="item-grid">
+            <h2>Melhorias Estruturais & Infraestrutura</h2>
+            <p class="subtitle">Melhorias permanentes da loja física. Níveis altos desbloqueiam bônus de XP passivos.</p>
+            <div class="item-grid" id="upgrades-permanentes-grid">
                 <div class="item-card">
                     <strong>Expansão de Fila</strong>
-                    <span>Aumenta limite de clientes (+2).</span>
+                    <span>Aumenta limite de clientes (+2 vagas).</span>
                     <span style="color: var(--warning)">Custo: R$ <span id="custo-fila">300</span></span>
                     <button class="btn-action" onclick="comprarUpgrade('fila')">Melhorar</button>
                 </div>
                 <div class="item-card">
-                    <strong>Ar Condicionado</strong>
-                    <span>Clientes perdem paciência mais devagar.</span>
+                    <strong>Ar Condicionado Central</strong>
+                    <span>Atrasa a perda de paciência dos clientes.</span>
                     <span style="color: var(--warning)">Custo: R$ <span id="custo-pac">500</span></span>
                     <button class="btn-action" onclick="comprarUpgrade('paciencia')">Melhorar</button>
                 </div>
                 <div class="item-card">
-                    <strong>Marketing Local</strong>
-                    <span>Aumenta fluxo de clientes.</span>
+                    <strong>Campanhas de Marketing</strong>
+                    <span>Aumenta a velocidade de entrada de clientes.</span>
                     <span style="color: var(--warning)">Custo: R$ <span id="custo-mkt">400</span></span>
                     <button class="btn-action" onclick="comprarUpgrade('marketing')">Melhorar</button>
+                </div>
+            </div>
+
+            <h3 style="margin-top:25px; margin-bottom:10px; color:var(--secondary)">Módulos de Otimização de XP (Desbloqueados por Nível)</h3>
+            <div class="item-grid" id="xp-upgrades-grid"></div>
+        </section>
+
+        <!-- PASSIVAS TEMPORÁRIAS (BUFFS) -->
+        <section id="passivas" class="view">
+            <h2>Impulsos & Passivas Temporárias</h2>
+            <p class="subtitle">Adquira consumíveis com efeitos imediatos poderosos para o expediente atual.</p>
+            <div class="item-grid">
+                <div class="item-card">
+                    <strong>Café Expresso Premium</strong>
+                    <span>Dobra a velocidade de limpeza e o poder dos caixas automáticos por 45 segundos.</span>
+                    <span style="color: var(--warning)">Custo: R$ 120.00</span>
+                    <button class="btn-action" style="background:var(--success); color:#000;" onclick="comprarConsumivel('cafe')">Ativar Café</button>
+                </div>
+                <div class="item-card">
+                    <strong>Fever de Black Friday</strong>
+                    <span>Gera 3x mais clientes e aumenta o bônus de gorjeta em +30% por 30 segundos.</span>
+                    <span style="color: var(--warning)">Custo: R$ 200.00</span>
+                    <button class="btn-action" style="background:var(--success); color:#000;" onclick="comprarConsumivel('blackfriday')">Ativar Fever</button>
+                </div>
+                <div class="item-card">
+                    <strong>Alvará de Limpeza Sanitária</strong>
+                    <span>Zera e congela o acúmulo de sujeira do mercado por 50 segundos.</span>
+                    <span style="color: var(--warning)">Custo: R$ 150.00</span>
+                    <button class="btn-action" style="background:var(--success); color:#000;" onclick="comprarConsumivel('alvara')">Comprar Alvará</button>
                 </div>
             </div>
         </section>
 
         <!-- TERMINAL VIEW -->
         <section id="terminal" class="view">
-            <h2>Terminal (Automação Lenta)</h2>
-            <p class="subtitle"><code>COMPRAR [id] [qtd]</code> | <code>VENDER [id] [qtd]</code></p>
-            <textarea id="terminal-area" placeholder="Ex: COMPRAR maca 10"></textarea>
-            <button class="btn-action" id="btn-run-script" style="background: var(--success);" onclick="iniciarScript()">Executar Script</button>
-            <div id="terminal-output">> Sistema Iniciado...</div>
+            <h2>Terminal Scripting (Automação Industrial)</h2>
+            <p class="subtitle"><code>COMPRAR [id] [qtd]</code> | <code>VENDER [id] [qtd]</code> (Execução em lote a cada 0.5s)</p>
+            <textarea id="terminal-area" placeholder="Ex:&#10;COMPRAR maca 10&#10;COMPRAR pao 5"></textarea>
+            <button class="btn-action" id="btn-run-script" style="background: var(--success); color:#000;" onclick="iniciarScript()">Executar Comandos</button>
+            <div id="terminal-output">> Linha de comando pronta...</div>
         </section>
     </main>
 
@@ -319,84 +379,138 @@
         // --- ESTADOS GLOBAIS ---
         let money = 300.00;
         let level = 1;
-        let xp = 0; let xpNext = 150;
+        let xp = 0; 
+        let xpNext = 150;
         let sujeira = 0;
         
-        // Dia e Noite
         let dia = 1;
         let expedienteAtivo = false;
         let tempoExpediente = 0;
-        const duracaoDia = 60; // Segundos
+        const duracaoDia = 60; 
 
-        // Upgrades
+        // Upgrades Permanentes
         let upg = {
             limiteFila: 5,
-            redPaciencia: 1, // Multiplicador de perda de paciencia
+            redPaciencia: 1.0, 
             taxaClientes: 0.25,
-            custos: { fila: 300, paciencia: 500, marketing: 400 }
+            custos: { fila: 300, paciencia: 500, marketing: 400 },
+            xpMultiplier: 1.0
         };
 
-        // Empregados
-        let equipe = { caixa: false, zelador: false, estoquista: false, alvoEstoquista: 'maca' };
+        // Estrutura de Funcionários Ampliada (Múltiplos e Níveis)
+        let equipe = {
+            caixa: { qtd: 0, lvl: 1, baseCusto: 300, baseSalario: 50, cooldown: 0 },
+            zelador: { qtd: 0, lvl: 1, baseCusto: 250, baseSalario: 40 },
+            estoquista: { qtd: 0, lvl: 1, baseCusto: 400, baseSalario: 60, alvos: [] } // alvos[index] guarda o ID do item focado por aquele estoquista
+        };
+
+        // Passivas Temporárias / Buffs (Tempo restante em segundos)
+        let buffs = {
+            cafe: 0,
+            blackfriday: 0,
+            alvara: 0
+        };
+
+        // Objetos Otimizadores de XP Compráveis por Nível
+        let xpUpgradesComprados = [];
+        const xpUpgradesConfig = [
+            { id: "prateleira", nome: "Gôndolas Organizadoras", desc: "+20% XP por venda", custo: 250, nvMin: 2, mult: 0.2 },
+            { id: "scanner", nome: "Scanners Biométricos", desc: "+35% XP por venda", custo: 500, nvMin: 4, mult: 0.35 },
+            { id: "cartao", nome: "Totem Clientes VIP", desc: "+50% XP por venda", custo: 1000, nvMin: 6, mult: 0.5 },
+            { id: "ia_precos", nome: "IA de Ajuste Dinâmico", desc: "+80% XP por venda", custo: 2500, nvMin: 9, mult: 0.8 }
+        ];
+
         let clientesFila = [];
         let clienteAtual = null;
         let idCounter = 1;
-        const nomesBots = ["Ana", "João", "Carlos", "Bia", "Lucas", "Mari", "Pedro", "Sofi", "Gabi", "Leo"];
+        const nomesBots = ["Ana", "João", "Carlos", "Bia", "Lucas", "Mari", "Pedro", "Sofi", "Gabi", "Leo", "Marcos", "Julia", "Arthur", "Beatriz", "Renan"];
 
-        // Base de Dados (Nível 1 ao 10)
+        // Catálogo Massivo de Itens Reconfigurado (Níveis 1 ao 12)
         const itensConfig = [
             { id: "maca", nome: "Maçã", cat: "Frutas", custo: 2, preco: 4, nvMin: 1 },
             { id: "banana", nome: "Banana", cat: "Frutas", custo: 1, preco: 3, nvMin: 1 },
-            { id: "batata", nome: "Batata", cat: "Legumes", custo: 1.5, preco: 3, nvMin: 1 },
+            { id: "batata", nome: "Batata", cat: "Legumes", custo: 1.5, preco: 3.5, nvMin: 1 },
             
             { id: "pao", nome: "Pão Francês", cat: "Padaria", custo: 0.5, preco: 1.5, nvMin: 2 },
-            { id: "leite", nome: "Leite", cat: "Laticínios", custo: 3, preco: 5.5, nvMin: 2 },
+            { id: "leite", nome: "Leite UHT", cat: "Laticínios", custo: 3, preco: 6, nvMin: 2 },
+            { id: "cafe_moido", nome: "Café Torrado", cat: "Mercearia", custo: 6, preco: 11, nvMin: 2 },
             
-            { id: "frango", nome: "Frango Kg", cat: "Carnes", custo: 10, preco: 18, nvMin: 3 },
-            { id: "refri", nome: "Refrigerante", cat: "Bebidas", custo: 3, preco: 6.5, nvMin: 3 },
+            { id: "frango", nome: "Frango Kg", cat: "Carnes", custo: 10, preco: 19, nvMin: 3 },
+            { id: "refri", nome: "Refrigerante 2L", cat: "Bebidas", custo: 3.5, preco: 7.5, nvMin: 3 },
+            { id: "agua", nome: "Água Mineral", cat: "Bebidas", custo: 1, preco: 2.5, nvMin: 3 },
             
-            { id: "sabao", nome: "Sabão em Pó", cat: "Limpeza", custo: 8, preco: 15, nvMin: 4 },
-            { id: "shampoo", nome: "Shampoo", cat: "Higiene", custo: 9, preco: 16, nvMin: 4 },
+            { id: "sabao", nome: "Sabão em Pó", cat: "Limpeza", custo: 8, preco: 16, nvMin: 4 },
+            { id: "shampoo", nome: "Shampoo Anticaspa", cat: "Higiene", custo: 9, preco: 18, nvMin: 4 },
+            { id: "detergente", nome: "Detergente Líquido", cat: "Limpeza", custo: 1.2, preco: 3.2, nvMin: 4 },
             
-            { id: "pizza", nome: "Pizza Cong.", cat: "Congelados", custo: 12, preco: 22, nvMin: 5 },
+            { id: "pizza", nome: "Pizza Congelada", cat: "Congelados", custo: 12, preco: 24, nvMin: 5 },
+            { id: "hamburguer", nome: "Hambúrguer Box", cat: "Congelados", custo: 14, preco: 27, nvMin: 5 },
             
-            { id: "arroz", nome: "Arroz 5kg", cat: "Grãos", custo: 15, preco: 25, nvMin: 6 },
-            { id: "feijao", nome: "Feijão 1kg", cat: "Grãos", custo: 6, preco: 10, nvMin: 6 },
+            { id: "arroz", nome: "Arroz 5kg", cat: "Grãos", custo: 16, preco: 29, nvMin: 6 },
+            { id: "feijao", nome: "Feijão 1kg", cat: "Grãos", custo: 6, preco: 12, nvMin: 6 },
+            { id: "oleo", nome: "Óleo de Soja", cat: "Mercearia", custo: 4.5, preco: 9, nvMin: 6 },
             
-            { id: "macarrao", nome: "Macarrão", cat: "Massas", custo: 3, preco: 6, nvMin: 7 },
-            { id: "molho", nome: "Molho Tomate", cat: "Enlatados", custo: 2, preco: 4.5, nvMin: 7 },
+            { id: "macarrao", nome: "Macarrão Pasta", cat: "Massas", custo: 3, preco: 6.5, nvMin: 7 },
+            { id: "molho", nome: "Molho de Tomate", cat: "Enlatados", custo: 1.8, preco: 4.2, nvMin: 7 },
+            { id: "queijo_p", nome: "Queijo Parmesão", cat: "Laticínios", custo: 4, preco: 9, nvMin: 7 },
             
-            { id: "pilha", nome: "Pilhas AA", cat: "Bazar", custo: 8, preco: 15, nvMin: 8 },
-            { id: "lampada", nome: "Lâmpada LED", cat: "Bazar", custo: 10, preco: 18, nvMin: 8 },
+            { id: "pilha", nome: "Pilhas AA x4", cat: "Bazar", custo: 8, preco: 17, nvMin: 8 },
+            { id: "lampada", nome: "Lâmpada LED", cat: "Bazar", custo: 10, preco: 20, nvMin: 8 },
             
-            { id: "racao", nome: "Ração Pet", cat: "Pets", custo: 25, preco: 40, nvMin: 9 },
+            { id: "racao", nome: "Ração Premium Cão", cat: "Pets", custo: 22, preco: 45, nvMin: 9 },
+            { id: "saches", nome: "Sachê de Gato Box", cat: "Pets", custo: 12, preco: 25, nvMin: 9 },
             
-            { id: "picanha", nome: "Picanha Kg", cat: "Açougue", custo: 40, preco: 75, nvMin: 10 },
-            { id: "azeite", nome: "Azeite Extra", cat: "Premium", custo: 30, preco: 55, nvMin: 10 }
+            { id: "picanha", nome: "Picanha Kg", cat: "Açougue", custo: 45, preco: 85, nvMin: 10 },
+            { id: "azeite", nome: "Azeite Extra Virgem", cat: "Premium", custo: 28, preco: 58, nvMin: 10 },
+
+            { id: "chocolate", nome: "Barras Importadas", cat: "Doces", custo: 14, preco: 32, nvMin: 11 },
+            { id: "energetico", nome: "Pack Energéticos", cat: "Bebidas", custo: 20, preco: 46, nvMin: 11 },
+
+            { id: "whisky", nome: "Whisky 12 Anos", cat: "Premium", custo: 70, preco: 155, nvMin: 12 },
+            { id: "camarao", nome: "Camarão Limpo Kg", cat: "Frutos do Mar", custo: 55, preco: 120, nvMin: 12 }
         ];
 
         let inventario = {};
         itensConfig.forEach(i => inventario[i.id] = { ...i, quantidade: 0 });
 
-        // --- CORE FUNCTIONS ---
+        // --- SISTEMA CORE & PROGRESSÃO ---
         function ganharXP(valor) {
-            if(level >= 10) return;
-            xp += valor;
-            while (xp >= xpNext && level < 10) {
-                xp -= xpNext; level++; xpNext = Math.floor(xpNext * 1.6);
-                logTerminal(`Nível UP! Você atingiu o Nível ${level}.`);
-                atualizarDropdownEstoquista(); atualizarEstoqueGrid();
+            let multFinal = upg.xpMultiplier;
+            xp += valor * multFinal;
+            while (xp >= xpNext) {
+                xp -= xpNext; 
+                level++; 
+                xpNext = Math.floor(xpNext * 1.55);
+                logTerminal(`Nível Aumentou! Você agora está no Nível ${level}. Novas mercadorias e estruturas liberadas!`);
+                atualizarDropdownsEstoquistas(); 
+                atualizarEstoqueGrid();
+                renderizarXpUpgrades();
             }
             atualizarInfosTop();
         }
 
-        function addSujeira(qtd) { sujeira = Math.min(100, sujeira + qtd); atualizarInfosTop(); }
-        function limparMercadoManual() { sujeira = Math.max(0, sujeira - 20); atualizarInfosTop(); }
+        function addSujeira(qtd) {
+            if (buffs.alvara > 0) return; // Imunidade contra sujeira
+            sujeira = Math.min(100, sujeira + qtd);
+            
+            let wrapper = document.getElementById('dirt-wrapper');
+            if (sujeira >= 75) {
+                wrapper.classList.add('danger-zone');
+            } else {
+                wrapper.classList.remove('danger-zone');
+            }
+            atualizarInfosTop();
+        }
 
-        // --- SISTEMA DE DIA/NOITE ---
+        function limparMercadoManual() {
+            sujeira = Math.max(0, sujeira - 20);
+            if(sujeira < 75) document.getElementById('dirt-wrapper').classList.remove('danger-zone');
+            atualizarInfosTop();
+        }
+
+        // --- EXPEDIENTE ---
         function toggleExpediente() {
             if(expedienteAtivo) {
-                // Fechar antes da hora (opcional) - penalidade?
                 finalizarExpediente(true);
             } else {
                 iniciarExpediente();
@@ -407,10 +521,10 @@
             expedienteAtivo = true;
             tempoExpediente = 0;
             const btn = document.getElementById('btn-expediente');
-            btn.innerText = "Encerrar Dia (Forçar)";
+            btn.innerText = "Encerrar Turno";
             btn.classList.add('ativo');
             document.getElementById('fila-container').innerHTML = '';
-            logTerminal(`--- DIA ${dia} INICIADO ---`);
+            logTerminal(`--- EXPEDIENTE DO DIA ${dia} INICIADO ---`);
         }
 
         function finalizarExpediente(forcado = false) {
@@ -421,40 +535,57 @@
             document.getElementById('tempo-texto').innerText = "Fechado";
             document.getElementById('expediente-bar').value = 0;
 
-            // Cobrança de Salários
-            let salarios = 0;
-            if(equipe.caixa) salarios += 50;
-            if(equipe.zelador) salarios += 40;
-            if(equipe.estoquista) salarios += 60;
+            // PUNIÇÃO POR SUJEIRA ACUMULADA: Multa Sanitária Pesada
+            let multaSujeira = 0;
+            if (sujeira >= 90) {
+                multaSujeira = 150 + (level * 20);
+                money = Math.max(0, money - multaSujeira);
+                alert(`[VIGILÂNCIA SANITÁRIA] Seu mercado fechou imundo (${Math.floor(sujeira)}% de sujeira). Multa aplicada: R$ ${multaSujeira.toFixed(2)}`);
+            } else if (sujeira >= 50) {
+                multaSujeira = 50 + (level * 5);
+                money = Math.max(0, money - multaSujeira);
+                logTerminal(`Multa por falta de higiene leve: R$ ${multaSujeira.toFixed(2)}`, true);
+            }
 
-            if(salarios > 0) {
-                money -= salarios;
-                alert(`O Dia ${dia} acabou!\nForam debitados R$ ${salarios} em salários da sua equipe.`);
+            // Pagamento de Equipe
+            let salCaixas = equipe.caixa.qtd * equipe.caixa.baseSalario * (1 + (equipe.caixa.lvl - 1) * 0.2);
+            let salZeladores = equipe.zelador.qtd * equipe.zelador.baseSalario * (1 + (equipe.zelador.lvl - 1) * 0.2);
+            let salEstoquistas = equipe.estoquista.qtd * equipe.estoquista.baseSalario * (1 + (equipe.estoquista.lvl - 1) * 0.2);
+            let totalSalarios = salCaixas + salZeladores + salEstoquistas;
+
+            if(totalSalarios > 0) {
+                money -= totalSalarios;
+                alert(`Fim do Dia ${dia}!\nSalários pagos: R$ ${totalSalarios.toFixed(2)}\nMultas de sujeira: R$ ${multaSujeira.toFixed(2)}`);
             } else if (!forcado) {
-                alert(`O Dia ${dia} acabou! Descanse e reabasteça o estoque.`);
+                alert(`O Dia ${dia} acabou sem funcionários contratados.`);
             }
 
             dia++;
+            // Limpar timers temporários de buffs na troca de dia
+            for (let b in buffs) buffs[b] = 0;
+
             document.getElementById('dia-display').innerText = dia;
-            
-            // Limpar fila e cliente atual (fuga s/ multa no fim do dia)
             clientesFila = [];
             clienteAtual = null;
+            
             renderizarFila();
             renderizarCaixaAtivo();
             atualizarInfosTop();
-            logTerminal(`--- DIA ENCERRADO ---`);
+            logTerminal(`--- DIA CONCLUÍDO ---`);
         }
 
-        // --- UI UPDATES ---
+        // --- ATUALIZAÇÕES DA INTERFACE ---
         function atualizarInfosTop() {
             document.getElementById('money-display').innerText = money.toFixed(2);
-            document.getElementById('nivel-display').innerText = level === 10 ? "MAX" : level;
-            document.getElementById('xp-text').innerText = level === 10 ? "MAX" : `${Math.floor(xp)}/${xpNext}`;
-            document.getElementById('xp-bar').value = xp; document.getElementById('xp-bar').max = xpNext;
+            document.getElementById('nivel-display').innerText = level;
+            document.getElementById('xp-text').innerText = `${Math.floor(xp)}/${xpNext}`;
+            document.getElementById('xp-bar').value = xp; 
+            document.getElementById('xp-bar').max = xpNext;
             document.getElementById('dirt-text').innerText = `${Math.floor(sujeira)}%`;
             document.getElementById('dirt-bar').value = sujeira;
             document.getElementById('fila-max').innerText = upg.limiteFila;
+            document.getElementById('xp-mult-display').innerText = upg.xpMultiplier.toFixed(1);
+            atualizarFormatosRH();
         }
 
         function atualizarEstoqueGrid() {
@@ -464,13 +595,17 @@
                 const locked = item.nvMin > level;
                 grid.innerHTML += `
                     <article class="item-card ${locked ? 'locked' : ''}">
-                        ${locked ? `<span class="lock-tag">Nv ${item.nvMin}</span>` : ''}
-                        <strong>${item.nome}</strong>
-                        <span>ID: <code>${item.id}</code></span>
-                        <span>Qtd: <mark id="est-${item.id}">${item.quantidade}</mark></span>
-                        <span style="color:var(--danger)">- R$ ${item.custo.toFixed(2)}</span>
-                        <span style="color:var(--success)">+ R$ ${item.preco.toFixed(2)}</span>
-                        <button class="btn-action" onclick="comprarManual('${item.id}', 1)" ${locked ? 'disabled' : ''}>Comprar 1</button>
+                        ${locked ? `<span class="lock-tag">Bloqueado Nv ${item.nvMin}</span>` : ''}
+                        <div>
+                            <strong>${item.nome}</strong>
+                            <span style="font-size:11px;">Ref: <code>${item.id}</code></span>
+                        </div>
+                        <span>Estoque: <mark id="est-${item.id}">${item.quantidade}</mark></span>
+                        <div>
+                            <span style="color:var(--danger)">Custo: R$ ${item.custo.toFixed(2)}</span>
+                            <span style="color:var(--success)">Venda: R$ ${item.preco.toFixed(2)}</span>
+                        </div>
+                        <button class="btn-action" onclick="comprarManual('${item.id}', 1)" ${locked ? 'disabled' : ''}>Comprar +1</button>
                     </article>
                 `;
             });
@@ -489,42 +624,90 @@
                 let p = document.getElementById('cliente-ativo-pac');
                 if(p) { p.value = clienteAtual.paciencia; p.className = `patience-bar ${clienteAtual.paciencia < 30 ? 'low' : (clienteAtual.paciencia < 60 ? 'med' : '')}`; }
             }
+            renderizarListaBuffs();
         }
 
-        // --- SISTEMA COMPRA E VENDA ---
+        function atualizarFormatosRH() {
+            // Caixa UI
+            let custoHCaixa = Math.floor(equipe.caixa.baseCusto * (1 + equipe.caixa.qtd * 0.6));
+            let custoUCaixa = Math.floor(equipe.caixa.baseCusto * equipe.caixa.lvl * 0.8);
+            let salT_Caixa = equipe.caixa.qtd * equipe.caixa.baseSalario * (1 + (equipe.caixa.lvl - 1) * 0.2);
+            document.getElementById('status-caixas').innerText = `Contratados: ${equipe.caixa.qtd}`;
+            document.getElementById('lvl-caixas').innerText = `Eficiência: Nv ${equipe.caixa.lvl} (Auto atendimento a cada ${Math.max(1, 5 - equipe.caixa.lvl)}s)`;
+            document.getElementById('salario-caixas').innerText = `Custo diário total: R$ ${salT_Caixa.toFixed(2)}`;
+            document.getElementById('cost-hire-caixa').innerText = custoHCaixa;
+            document.getElementById('cost-up-caixa').innerText = custoUCaixa;
+
+            // Zelador UI
+            let custoHZelador = Math.floor(equipe.zelador.baseCusto * (1 + equipe.zelador.qtd * 0.6));
+            let custoUZelador = Math.floor(equipe.zelador.baseCusto * equipe.zelador.lvl * 0.7);
+            let salT_Zelador = equipe.zelador.qtd * equipe.zelador.baseSalario * (1 + (equipe.zelador.lvl - 1) * 0.2);
+            document.getElementById('status-zeladores').innerText = `Contratados: ${equipe.zelador.qtd}`;
+            document.getElementById('lvl-zeladores').innerText = `Poder: Nv ${equipe.zelador.lvl} (${(1.5 * equipe.zelador.lvl * (buffs.cafe > 0 ? 2 : 1)).toFixed(1)}%/seg por Zelador)`;
+            document.getElementById('salario-zeladores').innerText = `Custo diário total: R$ ${salT_Zelador.toFixed(2)}`;
+            document.getElementById('cost-hire-zelador').innerText = custoHZelador;
+            document.getElementById('cost-up-zelador').innerText = custoUZelador;
+
+            // Estoquista UI
+            let custoHEstoquista = Math.floor(equipe.estoquista.baseCusto * (1 + equipe.estoquista.qtd * 0.6));
+            let custoUEstoquista = Math.floor(equipe.estoquista.baseCusto * equipe.estoquista.lvl * 0.9);
+            let salT_Estoque = equipe.estoquista.qtd * equipe.estoquista.baseSalario * (1 + (equipe.estoquista.lvl - 1) * 0.2);
+            document.getElementById('status-estoquistas').innerText = `Contratados: ${equipe.estoquista.qtd}`;
+            document.getElementById('lvl-estoquistas').innerText = `Velocidade: Nv ${equipe.estoquista.lvl} (${equipe.estoquista.lvl} un/ciclo)`;
+            document.getElementById('salario-estoquistas').innerText = `Custo diário total: R$ ${salT_Estoque.toFixed(2)}`;
+            document.getElementById('cost-hire-estoquista').innerText = custoHEstoquista;
+            document.getElementById('cost-up-estoquista').innerText = custoUEstoquista;
+        }
+
+        function renderizarListaBuffs() {
+            const container = document.getElementById('buffs-ativos-caixa');
+            container.innerHTML = '';
+            if (buffs.cafe > 0) container.innerHTML += `<span class="buff-badge">☕ Café Expresso (${buffs.cafe}s)</span>`;
+            if (buffs.blackfriday > 0) container.innerHTML += `<span class="buff-badge" style="color:var(--warning); border-color:var(--warning)">🔥 Black Friday (${buffs.blackfriday}s)</span>`;
+            if (buffs.alvara > 0) container.innerHTML += `<span class="buff-badge" style="color:var(--success); border-color:var(--success)">🛡️ Vigilância Controlada (${buffs.alvara}s)</span>`;
+        }
+
+        // --- LOGICA DE COMPRA E ATENDIMENTO ---
         function tentarComprar(id, qtd) {
             const item = inventario[id];
-            if (item.nvMin > level) return false;
+            if (!item || item.nvMin > level) return false;
             if (money >= item.custo * qtd) {
-                money -= item.custo * qtd; item.quantidade += qtd;
-                atualizarInfosTop(); atualizarValoresDinamicos();
+                money -= item.custo * qtd; 
+                item.quantidade += qtd;
+                atualizarInfosTop(); 
+                atualizarValoresDinamicos();
                 if(clienteAtual) renderizarSacolaAtiva();
                 return true;
             }
             return false;
         }
-        function comprarManual(id, qtd) { if(!tentarComprar(id, qtd)) alert("Sem dinheiro!"); }
+        function comprarManual(id, qtd) { if(!tentarComprar(id, qtd)) logTerminal("Dinheiro insuficiente para compras de suprimentos!", true); }
 
         function gerarCliente() {
-            if (sujeira >= 100) return;
-            const itensDisp = Object.values(inventario).filter(i => i.nvMin <= level);
-            if (itensDisp.length === 0) return;
+            if (sujeira >= 95) return; // Clientes recusam entrar se estiver imundo
+            const itensDisponiveis = Object.values(inventario).filter(i => i.nvMin <= level);
+            if (itensDisponiveis.length === 0) return;
 
-            const sacola = []; let total = 0;
-            // No fim do dia os clientes pedem mais itens
-            let modQtd = tempoExpediente > (duracaoDia * 0.7) ? 2 : 1; 
-            const qtdItens = Math.floor(Math.random() * 3) + modQtd;
+            const sacola = []; 
+            let total = 0;
+            let modQtd = tempoExpediente > (duracaoDia * 0.7) ? 3 : 1; 
+            const qtdItensDiferentes = Math.floor(Math.random() * 3) + modQtd;
 
-            for (let i = 0; i < qtdItens; i++) {
-                const ir = itensDisp[Math.floor(Math.random() * itensDisp.length)];
-                if (!sacola.find(s => s.id === ir.id)) {
-                    const qtd = Math.floor(Math.random() * 3) + 1;
-                    sacola.push({ id: ir.id, nome: ir.nome, qtd: qtd, preco: ir.preco });
-                    total += ir.preco * qtd;
+            for (let i = 0; i < qtdItensDiferentes; i++) {
+                const itemAleatorio = itensDisponiveis[Math.floor(Math.random() * itensDisponiveis.length)];
+                if (!sacola.find(s => s.id === itemAleatorio.id)) {
+                    const qtdPedida = Math.floor(Math.random() * 2) + 1;
+                    sacola.push({ id: itemAleatorio.id, nome: itemAleatorio.nome, qtd: qtdPedida, preco: itemAleatorio.preco });
+                    total += itemAleatorio.preco * qtdPedida;
                 }
             }
 
-            const notas = [5, 10, 20, 50, 100, 200];
+            // Bônus de inflação/fever na Black Friday
+            if (buffs.blackfriday > 0) {
+                total *= 1.30;
+            }
+
+            const notas = [5, 10, 20, 50, 100, 200, 500];
             let pago = notas.find(n => n >= total) || Math.ceil(total / 10) * 10;
 
             clientesFila.push({
@@ -533,7 +716,8 @@
                 sacola: sacola, total: total, pago: pago, paciencia: 100
             });
 
-            addSujeira(level * 2); // Suja mais rápido em níveis altos
+            // PUNIÇÃO INLINE DE SUJEIRA: Clientes sujam o mercado proporcional ao seu nível
+            addSujeira(0.8 + (level * 0.2)); 
             renderizarFila();
         }
 
@@ -541,7 +725,7 @@
             const cont = document.getElementById('fila-container');
             document.getElementById('fila-count').innerText = clientesFila.length;
             if(!expedienteAtivo && clientesFila.length === 0) {
-                cont.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">Mercado fechado.</p>';
+                cont.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">Mercado fechado temporariamente.</p>';
                 return;
             }
             cont.innerHTML = '';
@@ -549,8 +733,8 @@
                 cont.innerHTML += `
                     <div class="cliente-card" id="card-${cli.id}">
                         <div class="cliente-info">
-                            <div><strong>${cli.nome}</strong><br><span style="font-size:11px;color:var(--text-muted)">${cli.sacola.length} itens</span></div>
-                            <button onclick="chamarCliente(${i})" ${clienteAtual || equipe.caixa ? 'disabled' : ''}>Chamar</button>
+                            <div><strong>${cli.nome}</strong><br><span style="font-size:11px;color:var(--text-muted)">${cli.sacola.length} tipos de itens</span></div>
+                            <button onclick="chamarCliente(${i})" ${clienteAtual || equipe.caixa.qtd > 0 ? 'disabled' : ''}>Chamar</button>
                         </div>
                         <progress id="pac-${cli.id}" class="patience-bar" value="${cli.paciencia}" max="100" style="height: 6px;"></progress>
                     </div>`;
@@ -558,10 +742,11 @@
         }
 
         function chamarCliente(index) {
-            if (clienteAtual !== null) return;
+            if (clienteAtual !== null || equipe.caixa.qtd > 0) return;
             clienteAtual = clientesFila.splice(index, 1)[0];
             document.getElementById('input-troco').value = '';
-            renderizarCaixaAtivo(); renderizarFila();
+            renderizarCaixaAtivo(); 
+            renderizarFila();
         }
 
         function renderizarCaixaAtivo() {
@@ -576,8 +761,13 @@
             document.getElementById('compra-total').innerText = clienteAtual.total.toFixed(2);
             document.getElementById('compra-pago').innerText = clienteAtual.pago.toFixed(2);
 
-            document.getElementById('checkout-manual').style.display = equipe.caixa ? 'none' : 'block';
-            document.getElementById('checkout-auto').style.display = equipe.caixa ? 'block' : 'none';
+            if(equipe.caixa.qtd > 0) {
+                document.getElementById('checkout-manual').style.display = 'none';
+                document.getElementById('checkout-auto').style.display = 'block';
+            } else {
+                document.getElementById('checkout-manual').style.display = 'block';
+                document.getElementById('checkout-auto').style.display = 'none';
+            }
             renderizarSacolaAtiva();
         }
 
@@ -591,120 +781,303 @@
                 lista.innerHTML += `
                     <li class="sacola-item">
                         <span>${req.qtd}x ${req.nome}</span>
-                        ${falta ? `<span class="falta">Falta! (${est})</span>` : `<span style="color:var(--success)">OK</span>`}
+                        ${falta ? `<span class="falta">Falta Estoque! (${est})</span>` : `<span style="color:var(--success)">Pronto</span>`}
                     </li>`;
             });
         }
 
         function finalizarVenda() {
-            if (!clienteAtual) return;
-            for (let r of clienteAtual.sacola) if (inventario[r.id].quantidade < r.qtd) {
-                if(!equipe.caixa) alert(`Falta estoque de ${r.nome}!`);
-                return false;
-            }
-
-            if(!equipe.caixa) {
-                const dev = parseFloat((clienteAtual.pago - clienteAtual.total).toFixed(2));
-                const dig = parseFloat(document.getElementById('input-troco').value || 0).toFixed(2);
-                if (dig !== dev.toFixed(2)) {
-                    alert(`Troco Errado! Devido: R$ ${dev.toFixed(2)}`);
-                    money = Math.max(0, money - 5); atualizarInfosTop(); return false;
+            if (!clienteAtual) return false;
+            
+            // Verifica falta de estoque
+            for (let r of clienteAtual.sacola) {
+                if (inventario[r.id].quantidade < r.qtd) {
+                    if(equipe.caixa.qtd === 0) alert(`Você não tem ${r.nome} suficiente em estoque!`);
+                    return false;
                 }
             }
 
+            // Validação de troco manual se não houver caixas contratados
+            if(equipe.caixa.qtd === 0) {
+                const devido = parseFloat((clienteAtual.pago - clienteAtual.total).toFixed(2));
+                const digitado = parseFloat(document.getElementById('input-troco').value || 0).toFixed(2);
+                if (digitado !== devido.toFixed(2)) {
+                    alert(`Troco Errado! O correto era: R$ ${devido.toFixed(2)}`);
+                    money = Math.max(0, money - 8); 
+                    atualizarInfosTop(); 
+                    return false;
+                }
+            }
+
+            // Abate estoque e soma dinheiro
             clienteAtual.sacola.forEach(r => inventario[r.id].quantidade -= r.qtd);
             money += clienteAtual.total;
-            ganharXP(clienteAtual.total * 0.8);
+            
+            // Ganho estruturado de XP
+            ganharXP(clienteAtual.total * 0.9);
+            
             clienteAtual = null;
-            atualizarInfosTop(); renderizarCaixaAtivo(); renderizarFila();
+            atualizarInfosTop(); 
+            renderizarCaixaAtivo(); 
+            renderizarFila();
             return true;
         }
 
         function checarFugas() {
-            let m = 0;
+            let fugas = 0;
             for(let i = clientesFila.length - 1; i >= 0; i--) {
-                if(clientesFila[i].paciencia <= 0) { m++; clientesFila.splice(i, 1); }
+                if(clientesFila[i].paciencia <= 0) { 
+                    fugas++; 
+                    clientesFila.splice(i, 1); 
+                }
             }
-            if(clienteAtual && clienteAtual.paciencia <= 0) { m++; clienteAtual = null; renderizarCaixaAtivo(); }
-            if(m > 0) {
-                const perda = m * 20; money = Math.max(0, money - perda);
-                logTerminal(`[!] ${m} cliente(s) fugiram! Multa: R$ ${perda.toFixed(2)}`, true);
-                renderizarFila(); atualizarInfosTop();
+            if(clienteAtual && clienteAtual.paciencia <= 0) { 
+                fugas++; 
+                clienteAtual = null; 
+                renderizarCaixaAtivo(); 
+            }
+            if(fugas > 0) {
+                const multaFuga = fugas * (15 + level * 3); 
+                money = Math.max(0, money - multaFuga);
+                logTerminal(`[!] ${fugas} cliente(s) abandonaram a fila por impaciência. Prejuízo/Multa: R$ ${multaFuga.toFixed(2)}`, true);
+                renderizarFila(); 
+                atualizarInfosTop();
             }
         }
 
-        // --- UPGRADES & RH ---
-        function contratar(tipo, custo) {
-            if(money >= custo) {
-                money -= custo; equipe[tipo] = true;
-                document.getElementById(`btn-comp-${tipo}`).disabled = true;
-                document.getElementById(`btn-comp-${tipo}`).innerText = "Contratado";
+        // --- SISTEMA DE EMPREGADOS (RH) MULTI E UPGRADES ---
+        function contratarFuncionario(tipo) {
+            let dados = equipe[tipo];
+            let custoAtual = Math.floor(dados.baseCusto * (1 + dados.qtd * 0.6));
+            if(money >= custoAtual) {
+                money -= custoAtual;
+                dados.qtd++;
+                
                 if(tipo === 'estoquista') {
-                    document.getElementById('config-estoquista').style.display = 'block';
-                    atualizarDropdownEstoquista();
+                    // Adiciona um alvo padrão para o novo estoquista criado
+                    dados.alvos.push('maca');
+                    rebuildEstoquistasSelectors();
+                }
+                
+                logTerminal(`Funcionário (${tipo}) contratado com sucesso!`);
+                atualizarInfosTop();
+            } else {
+                alert("Verba insuficiente para esta contratação!");
+            }
+        }
+
+        function uparFuncionario(tipo) {
+            let dados = equipe[tipo];
+            let custoUp = Math.floor(dados.baseCusto * dados.lvl * 0.8);
+            if(money >= custoUp) {
+                money -= custoUp;
+                dados.lvl++;
+                logTerminal(`Sua equipe de ${tipo} subiu para o Nível ${dados.lvl}!`);
+                atualizarInfosTop();
+                atualizarValoresDinamicos();
+            } else {
+                alert("Verba insuficiente para o upgrade de nível!");
+            }
+        }
+
+        function rebuildEstoquistasSelectors() {
+            const container = document.getElementById('targets-estoquistas-container');
+            container.innerHTML = '';
+            for(let i = 0; i < equipe.estoquista.qtd; i++) {
+                let idSelect = `select-estoque-worker-${i}`;
+                container.innerHTML += `
+                    <div class="sub-config">
+                        <strong>Estoquista #${i+1} Alvo:</strong>
+                        <select id="${idSelect}" onchange="mudarAlvoEstoquistaIndiv(${i}, this.value)">
+                            ${Object.values(inventario).filter(item => item.nvMin <= level).map(item => `
+                                <option value="${item.id}" ${equipe.estoquista.alvos[i] === item.id ? 'selected' : ''}>${item.nome}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                `;
+            }
+        }
+
+        function atualizarDropdownsEstoquistas() {
+            rebuildEstoquistasSelectors();
+        }
+
+        function mudarAlvoEstoquistaIndiv(index, itemCalvo) {
+            equipe.estoquista.alvos[index] = itemCalvo;
+        }
+
+        // --- UPGRADES PERMANENTES E EXTRA XP ---
+        function comprarUpgrade(tipo) {
+            let custo = upg.custos[tipo];
+            if(money >= custo) {
+                money -= custo;
+                if(tipo === 'fila') { 
+                    upg.limiteFila += 2; 
+                    upg.custos.fila = Math.floor(upg.custos.fila * 2.2); 
+                    document.getElementById('custo-fila').innerText = upg.custos.fila; 
+                }
+                if(tipo === 'paciencia') { 
+                    upg.redPaciencia *= 0.75; 
+                    upg.custos.paciencia = Math.floor(upg.custos.paciencia * 2.5); 
+                    document.getElementById('custo-pac').innerText = upg.custos.paciencia; 
+                }
+                if(tipo === 'marketing') { 
+                    upg.taxaClientes += 0.12; 
+                    upg.custos.marketing = Math.floor(upg.custos.marketing * 2.1); 
+                    document.getElementById('custo-mkt').innerText = upg.custos.marketing; 
                 }
                 atualizarInfosTop();
-            } else alert("Dinheiro insuficiente!");
+            } else {
+                alert("Recursos monetários insuficientes!");
+            }
         }
 
-        function atualizarDropdownEstoquista() {
-            const sel = document.getElementById('select-estoquista'); sel.innerHTML = '';
-            Object.values(inventario).forEach(i => {
-                if(i.nvMin <= level) sel.innerHTML += `<option value="${i.id}">${i.nome}</option>`;
+        function renderizarXpUpgrades() {
+            const grid = document.getElementById('xp-upgrades-grid');
+            grid.innerHTML = '';
+            xpUpgradesConfig.forEach(cfg => {
+                let locked = level < cfg.nvMin;
+                let comprado = xpUpgradesComprados.includes(cfg.id);
+                grid.innerHTML += `
+                    <div class="item-card ${locked && !comprado ? 'locked' : ''}">
+                        <strong>${cfg.nome}</strong>
+                        <span>${cfg.desc}</span>
+                        <span style="color:var(--warning)">${comprado ? 'ADQUIRIDO' : 'Custo: R$ ' + cfg.custo}</span>
+                        <button class="btn-action" style="background:var(--secondary); color:#000;" 
+                            onclick="comprarXpUpgrade('${cfg.id}', ${cfg.custo}, ${cfg.mult})" 
+                            ${locked || comprado ? 'disabled' : ''}>
+                            ${comprado ? 'Ativo' : 'Instalar'}
+                        </button>
+                    </div>
+                `;
             });
         }
-        function mudarAlvoEstoquista(id) { equipe.alvoEstoquista = id; }
 
-        function comprarUpgrade(tipo) {
-            let c = upg.custos[tipo];
-            if(money >= c) {
-                money -= c;
-                if(tipo === 'fila') { upg.limiteFila += 2; upg.custos.fila *= 2; document.getElementById('custo-fila').innerText = upg.custos.fila; }
-                if(tipo === 'paciencia') { upg.redPaciencia *= 0.8; upg.custos.paciencia *= 2; document.getElementById('custo-pac').innerText = upg.custos.paciencia; }
-                if(tipo === 'marketing') { upg.taxaClientes += 0.15; upg.custos.marketing *= 2; document.getElementById('custo-mkt').innerText = upg.custos.marketing; }
+        function comprarXpUpgrade(id, custo, multiplicadorAdicional) {
+            if (money >= custo && !xpUpgradesComprados.includes(id)) {
+                money -= custo;
+                xpUpgradesComprados.push(id);
+                upg.xpMultiplier += multiplicadorAdicional;
+                logTerminal(`Módulo instalado! Multiplicador de XP global permanente subiu para ${upg.xpMultiplier.toFixed(2)}x`);
                 atualizarInfosTop();
-            } else alert("Dinheiro insuficiente!");
+                renderizarXpUpgrades();
+            }
         }
 
-        // --- GAME LOOP ---
+        // --- COMPRA DE PASSIVAS TEMPORÁRIAS ---
+        function comprarConsumivel(tipo) {
+            if(tipo === 'cafe' && money >= 120) {
+                money -= 120; buffs.cafe += 45; logTerminal("Bônus Ativado: Café Expresso! Equipes super aceleradas.");
+            } else if(tipo === 'blackfriday' && money >= 200) {
+                money -= 200; buffs.blackfriday += 30; logTerminal("Fever Ativado: Clientes correndo para a loja e pagando mais!");
+            } else if(tipo === 'alvara' && money >= 150) {
+                money -= 150; buffs.alvara += 50; sujeira = 0; logTerminal("Alvará Ativo: Imunidade total a sujeira concedida.");
+            } else {
+                alert("Saldo insuficiente para compras corporativas temporárias.");
+                return;
+            }
+            atualizarInfosTop();
+            atualizarValoresDinamicos();
+        }
+
+        // --- LOOP DE EXECUÇÃO PRINCIPAL (1 SEGUNDO) ---
+        let caixaTimer = 0;
         setInterval(() => {
+            // Decréscimo dos buffs temporários
+            for (let b in buffs) {
+                if (buffs[b] > 0) buffs[b]--;
+            }
+
             if(expedienteAtivo) {
                 tempoExpediente++;
-                
-                // UI de Tempo
                 document.getElementById('expediente-bar').value = tempoExpediente;
-                let falta = duracaoDia - tempoExpediente;
+                let falta = Math.max(0, duracaoDia - tempoExpediente);
                 document.getElementById('tempo-texto').innerText = `00:${falta.toString().padStart(2,'0')}`;
                 
-                // Modificador de Caos (Fim do dia = Clientes aparecem mais rápido)
-                let modChaos = 1 + (tempoExpediente / duracaoDia);
+                // PUNIÇÃO DE SUJEIRA EXTRA: Se sujeira > 65%, clientes perdem paciência muito mais rápido
+                let multiplicadorIncomodoSujeira = 1.0;
+                if (sujeira > 65) {
+                    multiplicadorIncomodoSujeira = 2.5;
+                } else if (sujeira > 40) {
+                    multiplicadorIncomodoSujeira = 1.5;
+                }
 
-                // Spawn Cliente
-                if (clientesFila.length < upg.limiteFila && Math.random() < (upg.taxaClientes * modChaos)) gerarCliente();
+                // Fluxo de Clientes (Aumenta bastante ao fim do dia ou durante Black Friday)
+                let modFluxo = (buffs.blackfriday > 0) ? 3.0 : (1 + (tempoExpediente / duracaoDia));
+                if (clientesFila.length < upg.limiteFila && Math.random() < (upg.taxaClientes * modFluxo)) {
+                    gerarCliente();
+                }
 
-                // Lógica Paciência
-                let modSuj = sujeira > 70 ? 1.5 : 1;
-                let perda = (3 * modSuj * upg.redPaciencia);
-                clientesFila.forEach(c => c.paciencia -= perda);
-                if(clienteAtual) clienteAtual.paciencia -= perda;
+                // Redução progressiva da paciência
+                let taxaDecaimento = (3.5 * multiplicadorIncomodoSujeira * upg.redPaciencia);
+                clientesFila.forEach(c => c.paciencia -= taxaDecaimento);
+                if(clienteAtual) clienteAtual.paciencia -= taxaDecaimento;
+                
                 checarFugas();
 
-                // Check Fim do Dia
+                // AUTOMATIZAÇÃO DE CAIXAS (Lógica de processamento escalável)
+                if(equipe.caixa.qtd > 0) {
+                    caixaTimer++;
+                    let tempoNecessario = Math.max(1, 5 - equipe.caixa.lvl);
+                    if(buffs.cafe > 0) tempoNecessario = Math.max(1, Math.floor(tempoNecessario / 2));
+
+                    if(caixaTimer >= tempoNecessario) {
+                        caixaTimer = 0;
+                        // Cada caixa contratado processa 1 cliente da fila de forma simultânea por ciclo
+                        let vendasAgendadas = Math.min(clientesFila.length, equipe.caixa.qtd);
+                        if(!clienteAtual && clientesFila.length > 0) {
+                            chamarCliente(0);
+                        }
+                        
+                        // Executa a finalização automática se possível
+                        if(clienteAtual) {
+                            let sucesso = finalizarVenda();
+                            if(!sucesso && clientesFila.length > 0) {
+                                // Se travou por falta de estoque, tenta girar a fila
+                                clientesFila.push(clienteAtual);
+                                clienteAtual = clientesFila.shift();
+                                renderizarCaixaAtivo();
+                            }
+                        }
+                    }
+                }
+
                 if(tempoExpediente >= duracaoDia) finalizarExpediente();
             }
 
-            // Automações RH (Trabalham mesmo fechado)
-            if(equipe.zelador) sujeira = Math.max(0, sujeira - 10);
-            if(equipe.estoquista) tentarComprar(equipe.alvoEstoquista, 1);
-            if(equipe.caixa && expedienteAtivo) {
-                if(!clienteAtual && clientesFila.length > 0) chamarCliente(0);
-                else if(clienteAtual) finalizarVenda();
+            // AUTOMATIZAÇÃO DE LIMPEZA (Zeladores trabalham o tempo todo)
+            if(equipe.zelador.qtd > 0) {
+                let efZelador = 1.5 * equipe.zelador.lvl;
+                if(buffs.cafe > 0) efZelador *= 2; 
+                let totalLimpo = equipe.zelador.qtd * efZelador;
+                sujeira = Math.max(0, sujeira - totalLimpo);
             }
 
-            atualizarInfosTop(); atualizarValoresDinamicos();
+            // AUTOMATIZAÇÃO DE COMPRA DE ESTOQUE (Estoquistas individuais por slot)
+            if(equipe.estoquista.qtd > 0) {
+                let unidadesDeCompra = equipe.estoquista.lvl;
+                // Cada estoquista compra o item configurado em seu painel
+                for(let i = 0; i < equipe.estoquista.qtd; i++) {
+                    let itemAlvo = equipe.estoquista.alvos[i];
+                    if(itemAlvo) {
+                        tentarComprar(itemAlvo, unidadesDeCompra);
+                    }
+                }
+            }
+
+            // PUNIÇÃO EXTREMA DE SUJEIRA EM TEMPO REAL
+            if(sujeira >= 100) {
+                money = Math.max(0, money - 0.5); // Perda contínua de dinheiro por desespero de clientes
+                document.getElementById('caixa-auto-status').innerText = "Vigilância sanitária multando loja!";
+            } else {
+                document.getElementById('caixa-auto-status').innerText = "Caixas automáticos operando...";
+            }
+
+            atualizarInfosTop(); 
+            atualizarValoresDinamicos();
         }, 1000);
 
-        // --- TERMINAL ---
+        // --- CORE TERMINAL SCRIPTING CODE ---
         function logTerminal(msg, isErr=false) {
             const out = document.getElementById('terminal-output');
             out.innerHTML += `<div style="color:${isErr ? 'var(--danger)' : 'var(--success)'};">> ${msg}</div>`;
@@ -719,37 +1092,56 @@
             document.getElementById('btn-run-script').disabled = true;
             let atual = 0;
 
-            let timer = setInterval(() => {
+            let timerScript = setInterval(() => {
                 if(atual >= linhas.length) {
-                    clearInterval(timer); document.getElementById('btn-run-script').disabled = false;
-                    area.value = ''; logTerminal('--- Fim ---'); return;
+                    clearInterval(timerScript); 
+                    document.getElementById('btn-run-script').disabled = false;
+                    area.value = ''; 
+                    logTerminal('--- Lote de Scripts Concluído ---'); 
+                    return;
                 }
-                let p = linhas[atual].toUpperCase().split(' ');
-                let cmd = p[0]; let arg = p[1]?.toLowerCase(); let qtd = parseInt(p[2]);
+                let partes = linhas[atual].toUpperCase().split(' ');
+                let cmd = partes[0]; 
+                let arg = partes[1]?.toLowerCase(); 
+                let qtd = parseInt(partes[2]) || 1;
 
                 if(cmd === "COMPRAR") {
-                    if(inventario[arg] && tentarComprar(arg, qtd)) logTerminal(`Comprou ${qtd} ${arg}`);
-                    else logTerminal(`Falha ao comprar ${arg}`, true);
+                    if(inventario[arg] && tentarComprar(arg, qtd)) {
+                        logTerminal(`Sucesso: Comprou ${qtd} unidade(s) de ${arg}`);
+                    } else {
+                        logTerminal(`Erro ao processar compra de: ${arg}`, true);
+                    }
                 } else if(cmd === "VENDER") {
                     if(inventario[arg] && inventario[arg].quantidade >= qtd) {
-                        inventario[arg].quantidade -= qtd; money += (inventario[arg].preco * 0.6) * qtd;
-                        logTerminal(`Vendeu ${qtd} ${arg}`);
-                    } else logTerminal(`Falha ao vender ${arg}`, true);
-                } else logTerminal(`Comando inválido: ${cmd}`, true);
-                atual++; atualizarInfosTop(); atualizarValoresDinamicos();
+                        inventario[arg].quantidade -= qtd; 
+                        money += (inventario[arg].preco * 0.5) * qtd; // Deságio de venda rápida
+                        logTerminal(`Liquidado: Vendeu ${qtd} un de ${arg} via atacado (50% valor)`);
+                    } else {
+                        logTerminal(`Erro na liquidação forçada de: ${arg}`, true);
+                    }
+                } else {
+                    logTerminal(`Comando desconhecido ou falho: ${cmd}`, true);
+                }
+                atual++; 
+                atualizarInfosTop(); 
+                atualizarValoresDinamicos();
             }, 500);
         }
 
-        // Navegação
+        // Navegação de Abas
         function switchTab(t) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(t).classList.add('active');
             event.currentTarget.classList.add('active');
+            if (t === 'rh') rebuildEstoquistasSelectors();
         }
 
-        // Init
-        atualizarInfosTop(); atualizarEstoqueGrid(); renderizarFila();
+        // --- STARTUP DA APLICAÇÃO ---
+        atualizarInfosTop(); 
+        atualizarEstoqueGrid(); 
+        renderizarFila();
+        renderizarXpUpgrades();
     </script>
 </body>
 </html>
