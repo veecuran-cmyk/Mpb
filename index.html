@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mercado Simulator V4 - Expedientes & Mobile</title>
+    <style>
+        :root {
+            --bg-dark: #11111b;
+            --bg-panel: #1e1e2e;
+            --bg-card: #313244;
+            --primary: #cba6f7;
+            --secondary: #89b4fa;
+            --success: #a6e3a1;
+            --danger: #f38ba8;
+            --warning: #f9e2af;
+            --dirt: #948279;
+            --text: #cdd6f4;
+            --text-muted: #7f849c;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text); display: flex; height: 100vh; }
+
+        /* Sidebar / Menu Lateral */
+        nav#sidebar {
+            width: 120px;
+            background-color: #181825;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            border-right: 2px solid var(--bg-panel);
+            z-index: 10;
+        }
+
+        .tab-btn {
+            background: none; border: none; color: var(--text-muted);
+            padding: 20px 0; width: 100%; cursor: pointer;
+            font-weight: bold; font-size: 12px; text-transform: uppercase;
+            transition: 0.2s; border-left: 4px solid transparent;
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            color: var(--primary); background-color: var(--bg-panel);
+            border-left: 4px solid var(--primary);
+        }
+
+        /* Área Principal */
+        main#main-content { flex: 1; display: flex; flex-direction: column; overflow-y: hidden; }
+
+        /* Header / Topbar */
+        header#status-bar {
+            background-color: var(--bg-panel); padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 5; flex-wrap: wrap; gap: 10px;
+        }
+
+        .status-group { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .money { color: var(--success); font-size: 20px; font-weight: 900; }
+        .level-badge { background: var(--primary); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 14px;}
+        .day-badge { background: var(--warning); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 14px;}
+        
+        .progress-container { display: flex; flex-direction: column; width: 100px; }
+        .progress-container span { font-size: 11px; color: var(--text-muted); margin-bottom: 2px;}
+        
+        progress { width: 100%; height: 10px; border-radius: 5px; appearance: none; }
+        progress::-webkit-progress-bar { background-color: var(--bg-dark); border-radius: 5px; }
+        progress.xp-bar::-webkit-progress-value { background-color: var(--secondary); border-radius: 5px; }
+        progress.dirt-bar::-webkit-progress-value { background-color: var(--dirt); border-radius: 5px; }
+        progress.patience-bar::-webkit-progress-value { background-color: var(--success); border-radius: 5px; transition: 0.5s; }
+        progress.patience-bar.low::-webkit-progress-value { background-color: var(--danger); }
+        progress.patience-bar.med::-webkit-progress-value { background-color: var(--warning); }
+        progress.time-bar::-webkit-progress-value { background-color: var(--warning); border-radius: 5px; transition: 1s linear; }
+
+        .clean-btn { background: var(--dirt); color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-top: 2px;}
+
+        /* Views (Abas) */
+        section.view { display: none; padding: 20px; height: 100%; overflow-y: auto; padding-bottom: 80px; }
+        section.view.active { display: block; }
+        h2 { margin-bottom: 5px; color: var(--primary); font-size: 22px; }
+        .subtitle { color: var(--text-muted); margin-bottom: 15px; font-size: 13px; }
+
+        /* Botões Globais */
+        button { cursor: pointer; border-radius: 6px; border: none; font-weight: bold; transition: 0.2s; }
+        button:active { transform: scale(0.95); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+        .btn-action { background-color: var(--primary); color: #000; padding: 10px; width: 100%; margin-top: 10px; font-size: 14px;}
+        .btn-success { background-color: var(--success); color: #000; padding: 10px; width: 100%; font-size: 16px; margin-top: 15px;}
+        .btn-expediente { background-color: var(--warning); color: #000; padding: 8px 15px; border-radius: 20px; font-size: 14px; box-shadow: 0 0 10px rgba(249, 226, 175, 0.4); }
+        .btn-expediente.ativo { background-color: var(--danger); color: #fff; box-shadow: 0 0 10px rgba(243, 139, 168, 0.4); }
+
+        /* Grid de Itens */
+        .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+        .item-card { background-color: var(--bg-card); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #444; position: relative; }
+        .item-card.locked { opacity: 0.5; filter: grayscale(100%); border-color: var(--danger); }
+        .item-card .lock-tag { position: absolute; top: -10px; right: -10px; background: var(--danger); color: #000; font-size: 11px; padding: 3px 8px; border-radius: 10px; font-weight: bold;}
+        .item-card strong { display: block; font-size: 16px; color: #fff; margin-bottom: 5px;}
+        .item-card span { display: block; margin: 2px 0; font-size: 12px; color: var(--text-muted); }
+        .item-card mark { background: #444; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+
+        /* Layout do Caixa */
+        .caixa-container { display: flex; gap: 15px; flex-direction: row; height: calc(100% - 100px); }
+        .fila-panel, .atendimento-panel { background: var(--bg-panel); border-radius: 10px; padding: 15px; display: flex; flex-direction: column;}
+        .fila-panel { width: 35%; overflow-y: auto; }
+        .atendimento-panel { width: 65%; }
+        
+        .cliente-card { background: var(--bg-card); padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; border-left: 4px solid var(--warning); }
+        .cliente-info { display: flex; justify-content: space-between; align-items: center; }
+        .cliente-info button { background: var(--warning); color: #000; padding: 5px 10px; }
+
+        .sacola-list { list-style: none; margin: 10px 0; flex: 1; overflow-y: auto; padding-right: 5px; }
+        .sacola-item { display: flex; justify-content: space-between; background: var(--bg-dark); padding: 8px; border-radius: 6px; margin-bottom: 5px; font-size: 13px;}
+        .sacola-item .falta { color: var(--danger); font-weight: bold; }
+        
+        .checkout-box { background: var(--bg-dark); padding: 15px; border-radius: 8px; border: 1px solid var(--primary); }
+        .checkout-info { display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 5px; }
+        .troco-input-group { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+        .troco-input-group input { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid var(--primary); background: var(--bg-card); color: #fff; font-size: 16px; outline: none; }
+        
+        /* Terminal */
+        #terminal-area { width: 100%; height: 100px; background: #000; color: var(--success); font-family: monospace; padding: 10px; border: 1px solid var(--primary); resize: none; border-radius: 8px; font-size: 14px;}
+        #terminal-output { margin-top: 10px; background: #000; padding: 10px; height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px; color: #aaa; border-radius: 8px;}
+
+        /* --- MEDIA QUERIES PARA MOBILE --- */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            nav#sidebar { 
+                width: 100%; flex-direction: row; padding: 0; border-right: none; 
+                border-top: 2px solid var(--bg-panel); order: 3; height: 60px; z-index: 100;
+                position: fixed; bottom: 0; background-color: #181825;
+            }
+            .tab-btn { padding: 10px; font-size: 10px; border-left: none; border-top: 4px solid transparent; }
+            .tab-btn:hover, .tab-btn.active { border-left: none; border-top: 4px solid var(--primary); }
+            main#main-content { order: 1; height: calc(100vh - 60px); }
+            
+            header#status-bar { justify-content: center; text-align: center; padding: 10px; }
+            .status-group { justify-content: center; gap: 10px; width: 100%; }
+            .progress-container { width: 80px; }
+
+            .caixa-container { flex-direction: column; height: auto; }
+            .fila-panel, .atendimento-panel { width: 100%; height: auto; min-height: 250px;}
+            
+            section.view { padding: 15px; padding-bottom: 30px;}
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR AGORA VIRA BOTTOM BAR NO MOBILE -->
+    <nav id="sidebar">
+        <button class="tab-btn active" onclick="switchTab('caixa')">Caixa</button>
+        <button class="tab-btn" onclick="switchTab('estoque')">Estoque</button>
+        <button class="tab-btn" onclick="switchTab('rh')">Equipe</button>
+        <button class="tab-btn" onclick="switchTab('upgrades')">Upgrades</button>
+        <button class="tab-btn" onclick="switchTab('terminal')">Código</button>
+    </nav>
+
+    <main id="main-content">
+        <header id="status-bar">
+            <div class="status-group">
+                <span class="day-badge">Dia <span id="dia-display">1</span></span>
+                <span class="level-badge">Nv <span id="nivel-display">1</span></span>
+                <div class="progress-container">
+                    <span>XP: <span id="xp-text">0/100</span></span>
+                    <progress id="xp-bar" class="xp-bar" value="0" max="100"></progress>
+                </div>
+                <div class="progress-container">
+                    <span>Sujeira: <span id="dirt-text">0%</span></span>
+                    <progress id="dirt-bar" class="dirt-bar" value="0" max="100"></progress>
+                </div>
+                <button class="clean-btn" onclick="limparMercadoManual()">Limpar (-20%)</button>
+            </div>
+            <div class="status-group">
+                <button id="btn-expediente" class="btn-expediente" onclick="toggleExpediente()">Abrir Mercado</button>
+                <div class="progress-container" style="width: 80px;">
+                    <span id="tempo-texto">Fechado</span>
+                    <progress id="expediente-bar" class="time-bar" value="0" max="60"></progress>
+                </div>
+                <span class="money">R$ <span id="money-display">300.00</span></span>
+            </div>
+        </header>
+
+        <!-- CAIXA VIEW -->
+        <section id="caixa" class="view active">
+            <h2>Frente de Caixa</h2>
+            <p class="subtitle">Abra o mercado para receber clientes. O caos aumenta no fim do dia!</p>
+            
+            <div class="caixa-container">
+                <article class="fila-panel">
+                    <h3 style="margin-bottom: 15px; color: var(--warning);">Fila (<span id="fila-count">0</span>/<span id="fila-max">5</span>)</h3>
+                    <div id="fila-container">
+                        <p style="color: var(--text-muted); font-size: 13px;">Mercado fechado. Aguardando expediente...</p>
+                    </div>
+                </article>
+
+                <article class="atendimento-panel">
+                    <h3 style="color: var(--secondary);">Em Atendimento</h3>
+                    <div id="atendimento-vazio" style="display: flex; flex: 1; align-items: center; justify-content: center; color: var(--text-muted); text-align: center;">
+                        Nenhum cliente no caixa.<br>Chame alguém da fila.
+                    </div>
+                    
+                    <div id="atendimento-ativo" style="display: none; flex-direction: column; flex: 1;">
+                        <div style="display:flex; justify-content: space-between; align-items: center;">
+                            <h4 id="cliente-nome" style="font-size: 18px; margin-bottom: 5px;">---</h4>
+                            <div class="progress-container" style="width: 100px;">
+                                <span>Paciência</span>
+                                <progress id="cliente-ativo-pac" class="patience-bar" value="100" max="100"></progress>
+                            </div>
+                        </div>
+                        
+                        <ul id="sacola-lista" class="sacola-list"></ul>
+
+                        <div class="checkout-box">
+                            <div class="checkout-info">
+                                <span>Total:</span>
+                                <span style="color: var(--warning); font-weight: bold;">R$ <span id="compra-total">0.00</span></span>
+                            </div>
+                            <div class="checkout-info">
+                                <span>Dinheiro:</span>
+                                <span style="color: var(--success); font-weight: bold;">R$ <span id="compra-pago">0.00</span></span>
+                            </div>
+                            
+                            <hr style="border: 1px solid #444; margin: 10px 0;">
+                            
+                            <div id="checkout-manual">
+                                <p style="font-size: 12px; color: var(--text-muted);">Calcule e digite o troco:</p>
+                                <div class="troco-input-group">
+                                    <span style="font-size: 18px;">R$</span>
+                                    <input type="number" id="input-troco" placeholder="0.00" step="0.01">
+                                    <button class="btn-success" style="margin-top: 0; width: auto; padding: 10px 20px;" onclick="finalizarVenda()">Cobrar</button>
+                                </div>
+                            </div>
+                            <div id="checkout-auto" style="display: none; text-align: center; color: var(--success); font-weight: bold; padding: 10px;">
+                                🤖 Operador bipando...
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- ESTOQUE VIEW -->
+        <section id="estoque" class="view">
+            <h2>Armazém & Fornecedores</h2>
+            <p class="subtitle">Compre mercadorias (Max Nível 10).</p>
+            <div id="estoque-grid" class="item-grid"></div>
+        </section>
+
+        <!-- RH VIEW -->
+        <section id="rh" class="view">
+            <h2>Recursos Humanos</h2>
+            <p class="subtitle">Automatize seu mercado. Eles cobram salário ao final de CADA DIA.</p>
+            <div class="item-grid">
+                <div class="item-card emp-card" id="card-emp-caixa">
+                    <strong>💳 Caixa</strong>
+                    <span>Automatiza vendas e troco.</span>
+                    <span style="color: var(--warning)">Contrato: R$ 300</span>
+                    <span style="color: var(--danger)">Salário/Dia: R$ 50</span>
+                    <button class="btn-action" id="btn-comp-caixa" onclick="contratar('caixa', 300)">Contratar</button>
+                </div>
+                <div class="item-card emp-card" id="card-emp-zelador">
+                    <strong>🧹 Zelador</strong>
+                    <span>Limpa o mercado (10%/seg).</span>
+                    <span style="color: var(--warning)">Contrato: R$ 250</span>
+                    <span style="color: var(--danger)">Salário/Dia: R$ 40</span>
+                    <button class="btn-action" id="btn-comp-zelador" onclick="contratar('zelador', 250)">Contratar</button>
+                </div>
+                <div class="item-card emp-card" id="card-emp-estoquista">
+                    <strong>📦 Estoquista</strong>
+                    <span>Compra 1x item/seg automaticamente.</span>
+                    <span style="color: var(--warning)">Contrato: R$ 400</span>
+                    <span style="color: var(--danger)">Salário/Dia: R$ 60</span>
+                    <button class="btn-action" id="btn-comp-estoquista" onclick="contratar('estoquista', 400)">Contratar</button>
+                    <div class="emp-config" id="config-estoquista" style="display:none;">
+                        <select id="select-estoquista" onchange="mudarAlvoEstoquista(this.value)"></select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- UPGRADES VIEW -->
+        <section id="upgrades" class="view">
+            <h2>Melhorias da Loja</h2>
+            <p class="subtitle">Evolua sua infraestrutura para lidar com o caos.</p>
+            <div class="item-grid">
+                <div class="item-card">
+                    <strong>Expansão de Fila</strong>
+                    <span>Aumenta limite de clientes (+2).</span>
+                    <span style="color: var(--warning)">Custo: R$ <span id="custo-fila">300</span></span>
+                    <button class="btn-action" onclick="comprarUpgrade('fila')">Melhorar</button>
+                </div>
+                <div class="item-card">
+                    <strong>Ar Condicionado</strong>
+                    <span>Clientes perdem paciência mais devagar.</span>
+                    <span style="color: var(--warning)">Custo: R$ <span id="custo-pac">500</span></span>
+                    <button class="btn-action" onclick="comprarUpgrade('paciencia')">Melhorar</button>
+                </div>
+                <div class="item-card">
+                    <strong>Marketing Local</strong>
+                    <span>Aumenta fluxo de clientes.</span>
+                    <span style="color: var(--warning)">Custo: R$ <span id="custo-mkt">400</span></span>
+                    <button class="btn-action" onclick="comprarUpgrade('marketing')">Melhorar</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TERMINAL VIEW -->
+        <section id="terminal" class="view">
+            <h2>Terminal (Automação Lenta)</h2>
+            <p class="subtitle"><code>COMPRAR [id] [qtd]</code> | <code>VENDER [id] [qtd]</code></p>
+            <textarea id="terminal-area" placeholder="Ex: COMPRAR maca 10"></textarea>
+            <button class="btn-action" id="btn-run-script" style="background: var(--success);" onclick="iniciarScript()">Executar Script</button>
+            <div id="terminal-output">> Sistema Iniciado...</div>
+        </section>
+    </main>
+
+    <script>
+        // --- ESTADOS GLOBAIS ---
+        let money = 300.00;
+        let level = 1;
+        let xp = 0; let xpNext = 150;
+        let sujeira = 0;
+        
+        // Dia e Noite
+        let dia = 1;
+        let expedienteAtivo = false;
+        let tempoExpediente = 0;
+        const duracaoDia = 60; // Segundos
+
+        // Upgrades
+        let upg = {
+            limiteFila: 5,
+            redPaciencia: 1, // Multiplicador de perda de paciencia
+            taxaClientes: 0.25,
+            custos: { fila: 300, paciencia: 500, marketing: 400 }
+        };
+
+        // Empregados
+        let equipe = { caixa: false, zelador: false, estoquista: false, alvoEstoquista: 'maca' };
+        let clientesFila = [];
+        let clienteAtual = null;
+        let idCounter = 1;
+        const nomesBots = ["Ana", "João", "Carlos", "Bia", "Lucas", "Mari", "Pedro", "Sofi", "Gabi", "Leo"];
+
+        // Base de Dados (Nível 1 ao 10)
+        const itensConfig = [
+            { id: "maca", nome: "Maçã", cat: "Frutas", custo: 2, preco: 4, nvMin: 1 },
+            { id: "banana", nome: "Banana", cat: "Frutas", custo: 1, preco: 3, nvMin: 1 },
+            { id: "batata", nome: "Batata", cat: "Legumes", custo: 1.5, preco: 3, nvMin: 1 },
+            
+            { id: "pao", nome: "Pão Francês", cat: "Padaria", custo: 0.5, preco: 1.5, nvMin: 2 },
+            { id: "leite", nome: "Leite", cat: "Laticínios", custo: 3, preco: 5.5, nvMin: 2 },
+            
+            { id: "frango", nome: "Frango Kg", cat: "Carnes", custo: 10, preco: 18, nvMin: 3 },
+            { id: "refri", nome: "Refrigerante", cat: "Bebidas", custo: 3, preco: 6.5, nvMin: 3 },
+            
+            { id: "sabao", nome: "Sabão em Pó", cat: "Limpeza", custo: 8, preco: 15, nvMin: 4 },
+            { id: "shampoo", nome: "Shampoo", cat: "Higiene", custo: 9, preco: 16, nvMin: 4 },
+            
+            { id: "pizza", nome: "Pizza Cong.", cat: "Congelados", custo: 12, preco: 22, nvMin: 5 },
+            
+            { id: "arroz", nome: "Arroz 5kg", cat: "Grãos", custo: 15, preco: 25, nvMin: 6 },
+            { id: "feijao", nome: "Feijão 1kg", cat: "Grãos", custo: 6, preco: 10, nvMin: 6 },
+            
+            { id: "macarrao", nome: "Macarrão", cat: "Massas", custo: 3, preco: 6, nvMin: 7 },
+            { id: "molho", nome: "Molho Tomate", cat: "Enlatados", custo: 2, preco: 4.5, nvMin: 7 },
+            
+            { id: "pilha", nome: "Pilhas AA", cat: "Bazar", custo: 8, preco: 15, nvMin: 8 },
+            { id: "lampada", nome: "Lâmpada LED", cat: "Bazar", custo: 10, preco: 18, nvMin: 8 },
+            
+            { id: "racao", nome: "Ração Pet", cat: "Pets", custo: 25, preco: 40, nvMin: 9 },
+            
+            { id: "picanha", nome: "Picanha Kg", cat: "Açougue", custo: 40, preco: 75, nvMin: 10 },
+            { id: "azeite", nome: "Azeite Extra", cat: "Premium", custo: 30, preco: 55, nvMin: 10 }
+        ];
+
+        let inventario = {};
+        itensConfig.forEach(i => inventario[i.id] = { ...i, quantidade: 0 });
+
+        // --- CORE FUNCTIONS ---
+        function ganharXP(valor) {
+            if(level >= 10) return;
+            xp += valor;
+            while (xp >= xpNext && level < 10) {
+                xp -= xpNext; level++; xpNext = Math.floor(xpNext * 1.6);
+                logTerminal(`Nível UP! Você atingiu o Nível ${level}.`);
+                atualizarDropdownEstoquista(); atualizarEstoqueGrid();
+            }
+            atualizarInfosTop();
+        }
+
+        function addSujeira(qtd) { sujeira = Math.min(100, sujeira + qtd); atualizarInfosTop(); }
+        function limparMercadoManual() { sujeira = Math.max(0, sujeira - 20); atualizarInfosTop(); }
+
+        // --- SISTEMA DE DIA/NOITE ---
+        function toggleExpediente() {
+            if(expedienteAtivo) {
+                // Fechar antes da hora (opcional) - penalidade?
+                finalizarExpediente(true);
+            } else {
+                iniciarExpediente();
+            }
+        }
+
+        function iniciarExpediente() {
+            expedienteAtivo = true;
+            tempoExpediente = 0;
+            const btn = document.getElementById('btn-expediente');
+            btn.innerText = "Encerrar Dia (Forçar)";
+            btn.classList.add('ativo');
+            document.getElementById('fila-container').innerHTML = '';
+            logTerminal(`--- DIA ${dia} INICIADO ---`);
+        }
+
+        function finalizarExpediente(forcado = false) {
+            expedienteAtivo = false;
+            const btn = document.getElementById('btn-expediente');
+            btn.innerText = "Abrir Mercado";
+            btn.classList.remove('ativo');
+            document.getElementById('tempo-texto').innerText = "Fechado";
+            document.getElementById('expediente-bar').value = 0;
+
+            // Cobrança de Salários
+            let salarios = 0;
+            if(equipe.caixa) salarios += 50;
+            if(equipe.zelador) salarios += 40;
+            if(equipe.estoquista) salarios += 60;
+
+            if(salarios > 0) {
+                money -= salarios;
+                alert(`O Dia ${dia} acabou!\nForam debitados R$ ${salarios} em salários da sua equipe.`);
+            } else if (!forcado) {
+                alert(`O Dia ${dia} acabou! Descanse e reabasteça o estoque.`);
+            }
+
+            dia++;
+            document.getElementById('dia-display').innerText = dia;
+            
+            // Limpar fila e cliente atual (fuga s/ multa no fim do dia)
+            clientesFila = [];
+            clienteAtual = null;
+            renderizarFila();
+            renderizarCaixaAtivo();
+            atualizarInfosTop();
+            logTerminal(`--- DIA ENCERRADO ---`);
+        }
+
+        // --- UI UPDATES ---
+        function atualizarInfosTop() {
+            document.getElementById('money-display').innerText = money.toFixed(2);
+            document.getElementById('nivel-display').innerText = level === 10 ? "MAX" : level;
+            document.getElementById('xp-text').innerText = level === 10 ? "MAX" : `${Math.floor(xp)}/${xpNext}`;
+            document.getElementById('xp-bar').value = xp; document.getElementById('xp-bar').max = xpNext;
+            document.getElementById('dirt-text').innerText = `${Math.floor(sujeira)}%`;
+            document.getElementById('dirt-bar').value = sujeira;
+            document.getElementById('fila-max').innerText = upg.limiteFila;
+        }
+
+        function atualizarEstoqueGrid() {
+            const grid = document.getElementById('estoque-grid');
+            grid.innerHTML = '';
+            Object.values(inventario).forEach(item => {
+                const locked = item.nvMin > level;
+                grid.innerHTML += `
+                    <article class="item-card ${locked ? 'locked' : ''}">
+                        ${locked ? `<span class="lock-tag">Nv ${item.nvMin}</span>` : ''}
+                        <strong>${item.nome}</strong>
+                        <span>ID: <code>${item.id}</code></span>
+                        <span>Qtd: <mark id="est-${item.id}">${item.quantidade}</mark></span>
+                        <span style="color:var(--danger)">- R$ ${item.custo.toFixed(2)}</span>
+                        <span style="color:var(--success)">+ R$ ${item.preco.toFixed(2)}</span>
+                        <button class="btn-action" onclick="comprarManual('${item.id}', 1)" ${locked ? 'disabled' : ''}>Comprar 1</button>
+                    </article>
+                `;
+            });
+        }
+
+        function atualizarValoresDinamicos() {
+            Object.values(inventario).forEach(item => {
+                let el = document.getElementById(`est-${item.id}`);
+                if(el) el.innerText = item.quantidade;
+            });
+            clientesFila.forEach(cli => {
+                let p = document.getElementById(`pac-${cli.id}`);
+                if(p) { p.value = cli.paciencia; p.className = `patience-bar ${cli.paciencia < 30 ? 'low' : (cli.paciencia < 60 ? 'med' : '')}`; }
+            });
+            if (clienteAtual) {
+                let p = document.getElementById('cliente-ativo-pac');
+                if(p) { p.value = clienteAtual.paciencia; p.className = `patience-bar ${clienteAtual.paciencia < 30 ? 'low' : (clienteAtual.paciencia < 60 ? 'med' : '')}`; }
+            }
+        }
+
+        // --- SISTEMA COMPRA E VENDA ---
+        function tentarComprar(id, qtd) {
+            const item = inventario[id];
+            if (item.nvMin > level) return false;
+            if (money >= item.custo * qtd) {
+                money -= item.custo * qtd; item.quantidade += qtd;
+                atualizarInfosTop(); atualizarValoresDinamicos();
+                if(clienteAtual) renderizarSacolaAtiva();
+                return true;
+            }
+            return false;
+        }
+        function comprarManual(id, qtd) { if(!tentarComprar(id, qtd)) alert("Sem dinheiro!"); }
+
+        function gerarCliente() {
+            if (sujeira >= 100) return;
+            const itensDisp = Object.values(inventario).filter(i => i.nvMin <= level);
+            if (itensDisp.length === 0) return;
+
+            const sacola = []; let total = 0;
+            // No fim do dia os clientes pedem mais itens
+            let modQtd = tempoExpediente > (duracaoDia * 0.7) ? 2 : 1; 
+            const qtdItens = Math.floor(Math.random() * 3) + modQtd;
+
+            for (let i = 0; i < qtdItens; i++) {
+                const ir = itensDisp[Math.floor(Math.random() * itensDisp.length)];
+                if (!sacola.find(s => s.id === ir.id)) {
+                    const qtd = Math.floor(Math.random() * 3) + 1;
+                    sacola.push({ id: ir.id, nome: ir.nome, qtd: qtd, preco: ir.preco });
+                    total += ir.preco * qtd;
+                }
+            }
+
+            const notas = [5, 10, 20, 50, 100, 200];
+            let pago = notas.find(n => n >= total) || Math.ceil(total / 10) * 10;
+
+            clientesFila.push({
+                id: idCounter++,
+                nome: nomesBots[Math.floor(Math.random() * nomesBots.length)],
+                sacola: sacola, total: total, pago: pago, paciencia: 100
+            });
+
+            addSujeira(level * 2); // Suja mais rápido em níveis altos
+            renderizarFila();
+        }
+
+        function renderizarFila() {
+            const cont = document.getElementById('fila-container');
+            document.getElementById('fila-count').innerText = clientesFila.length;
+            if(!expedienteAtivo && clientesFila.length === 0) {
+                cont.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">Mercado fechado.</p>';
+                return;
+            }
+            cont.innerHTML = '';
+            clientesFila.forEach((cli, i) => {
+                cont.innerHTML += `
+                    <div class="cliente-card" id="card-${cli.id}">
+                        <div class="cliente-info">
+                            <div><strong>${cli.nome}</strong><br><span style="font-size:11px;color:var(--text-muted)">${cli.sacola.length} itens</span></div>
+                            <button onclick="chamarCliente(${i})" ${clienteAtual || equipe.caixa ? 'disabled' : ''}>Chamar</button>
+                        </div>
+                        <progress id="pac-${cli.id}" class="patience-bar" value="${cli.paciencia}" max="100" style="height: 6px;"></progress>
+                    </div>`;
+            });
+        }
+
+        function chamarCliente(index) {
+            if (clienteAtual !== null) return;
+            clienteAtual = clientesFila.splice(index, 1)[0];
+            document.getElementById('input-troco').value = '';
+            renderizarCaixaAtivo(); renderizarFila();
+        }
+
+        function renderizarCaixaAtivo() {
+            if (!clienteAtual) {
+                document.getElementById('atendimento-vazio').style.display = 'flex';
+                document.getElementById('atendimento-ativo').style.display = 'none';
+                return;
+            }
+            document.getElementById('atendimento-vazio').style.display = 'none';
+            document.getElementById('atendimento-ativo').style.display = 'flex';
+            document.getElementById('cliente-nome').innerText = clienteAtual.nome;
+            document.getElementById('compra-total').innerText = clienteAtual.total.toFixed(2);
+            document.getElementById('compra-pago').innerText = clienteAtual.pago.toFixed(2);
+
+            document.getElementById('checkout-manual').style.display = equipe.caixa ? 'none' : 'block';
+            document.getElementById('checkout-auto').style.display = equipe.caixa ? 'block' : 'none';
+            renderizarSacolaAtiva();
+        }
+
+        function renderizarSacolaAtiva() {
+            if(!clienteAtual) return;
+            const lista = document.getElementById('sacola-lista');
+            lista.innerHTML = '';
+            clienteAtual.sacola.forEach(req => {
+                const est = inventario[req.id].quantidade;
+                const falta = est < req.qtd;
+                lista.innerHTML += `
+                    <li class="sacola-item">
+                        <span>${req.qtd}x ${req.nome}</span>
+                        ${falta ? `<span class="falta">Falta! (${est})</span>` : `<span style="color:var(--success)">OK</span>`}
+                    </li>`;
+            });
+        }
+
+        function finalizarVenda() {
+            if (!clienteAtual) return;
+            for (let r of clienteAtual.sacola) if (inventario[r.id].quantidade < r.qtd) {
+                if(!equipe.caixa) alert(`Falta estoque de ${r.nome}!`);
+                return false;
+            }
+
+            if(!equipe.caixa) {
+                const dev = parseFloat((clienteAtual.pago - clienteAtual.total).toFixed(2));
+                const dig = parseFloat(document.getElementById('input-troco').value || 0).toFixed(2);
+                if (dig !== dev.toFixed(2)) {
+                    alert(`Troco Errado! Devido: R$ ${dev.toFixed(2)}`);
+                    money = Math.max(0, money - 5); atualizarInfosTop(); return false;
+                }
+            }
+
+            clienteAtual.sacola.forEach(r => inventario[r.id].quantidade -= r.qtd);
+            money += clienteAtual.total;
+            ganharXP(clienteAtual.total * 0.8);
+            clienteAtual = null;
+            atualizarInfosTop(); renderizarCaixaAtivo(); renderizarFila();
+            return true;
+        }
+
+        function checarFugas() {
+            let m = 0;
+            for(let i = clientesFila.length - 1; i >= 0; i--) {
+                if(clientesFila[i].paciencia <= 0) { m++; clientesFila.splice(i, 1); }
+            }
+            if(clienteAtual && clienteAtual.paciencia <= 0) { m++; clienteAtual = null; renderizarCaixaAtivo(); }
+            if(m > 0) {
+                const perda = m * 20; money = Math.max(0, money - perda);
+                logTerminal(`[!] ${m} cliente(s) fugiram! Multa: R$ ${perda.toFixed(2)}`, true);
+                renderizarFila(); atualizarInfosTop();
+            }
+        }
+
+        // --- UPGRADES & RH ---
+        function contratar(tipo, custo) {
+            if(money >= custo) {
+                money -= custo; equipe[tipo] = true;
+                document.getElementById(`btn-comp-${tipo}`).disabled = true;
+                document.getElementById(`btn-comp-${tipo}`).innerText = "Contratado";
+                if(tipo === 'estoquista') {
+                    document.getElementById('config-estoquista').style.display = 'block';
+                    atualizarDropdownEstoquista();
+                }
+                atualizarInfosTop();
+            } else alert("Dinheiro insuficiente!");
+        }
+
+        function atualizarDropdownEstoquista() {
+            const sel = document.getElementById('select-estoquista'); sel.innerHTML = '';
+            Object.values(inventario).forEach(i => {
+                if(i.nvMin <= level) sel.innerHTML += `<option value="${i.id}">${i.nome}</option>`;
+            });
+        }
+        function mudarAlvoEstoquista(id) { equipe.alvoEstoquista = id; }
+
+        function comprarUpgrade(tipo) {
+            let c = upg.custos[tipo];
+            if(money >= c) {
+                money -= c;
+                if(tipo === 'fila') { upg.limiteFila += 2; upg.custos.fila *= 2; document.getElementById('custo-fila').innerText = upg.custos.fila; }
+                if(tipo === 'paciencia') { upg.redPaciencia *= 0.8; upg.custos.paciencia *= 2; document.getElementById('custo-pac').innerText = upg.custos.paciencia; }
+                if(tipo === 'marketing') { upg.taxaClientes += 0.15; upg.custos.marketing *= 2; document.getElementById('custo-mkt').innerText = upg.custos.marketing; }
+                atualizarInfosTop();
+            } else alert("Dinheiro insuficiente!");
+        }
+
+        // --- GAME LOOP ---
+        setInterval(() => {
+            if(expedienteAtivo) {
+                tempoExpediente++;
+                
+                // UI de Tempo
+                document.getElementById('expediente-bar').value = tempoExpediente;
+                let falta = duracaoDia - tempoExpediente;
+                document.getElementById('tempo-texto').innerText = `00:${falta.toString().padStart(2,'0')}`;
+                
+                // Modificador de Caos (Fim do dia = Clientes aparecem mais rápido)
+                let modChaos = 1 + (tempoExpediente / duracaoDia);
+
+                // Spawn Cliente
+                if (clientesFila.length < upg.limiteFila && Math.random() < (upg.taxaClientes * modChaos)) gerarCliente();
+
+                // Lógica Paciência
+                let modSuj = sujeira > 70 ? 1.5 : 1;
+                let perda = (3 * modSuj * upg.redPaciencia);
+                clientesFila.forEach(c => c.paciencia -= perda);
+                if(clienteAtual) clienteAtual.paciencia -= perda;
+                checarFugas();
+
+                // Check Fim do Dia
+                if(tempoExpediente >= duracaoDia) finalizarExpediente();
+            }
+
+            // Automações RH (Trabalham mesmo fechado)
+            if(equipe.zelador) sujeira = Math.max(0, sujeira - 10);
+            if(equipe.estoquista) tentarComprar(equipe.alvoEstoquista, 1);
+            if(equipe.caixa && expedienteAtivo) {
+                if(!clienteAtual && clientesFila.length > 0) chamarCliente(0);
+                else if(clienteAtual) finalizarVenda();
+            }
+
+            atualizarInfosTop(); atualizarValoresDinamicos();
+        }, 1000);
+
+        // --- TERMINAL ---
+        function logTerminal(msg, isErr=false) {
+            const out = document.getElementById('terminal-output');
+            out.innerHTML += `<div style="color:${isErr ? 'var(--danger)' : 'var(--success)'};">> ${msg}</div>`;
+            out.scrollTop = out.scrollHeight;
+        }
+
+        function iniciarScript() {
+            const area = document.getElementById('terminal-area');
+            const linhas = area.value.trim().split('\n').filter(l => l.trim() !== '');
+            if(linhas.length === 0) return;
+
+            document.getElementById('btn-run-script').disabled = true;
+            let atual = 0;
+
+            let timer = setInterval(() => {
+                if(atual >= linhas.length) {
+                    clearInterval(timer); document.getElementById('btn-run-script').disabled = false;
+                    area.value = ''; logTerminal('--- Fim ---'); return;
+                }
+                let p = linhas[atual].toUpperCase().split(' ');
+                let cmd = p[0]; let arg = p[1]?.toLowerCase(); let qtd = parseInt(p[2]);
+
+                if(cmd === "COMPRAR") {
+                    if(inventario[arg] && tentarComprar(arg, qtd)) logTerminal(`Comprou ${qtd} ${arg}`);
+                    else logTerminal(`Falha ao comprar ${arg}`, true);
+                } else if(cmd === "VENDER") {
+                    if(inventario[arg] && inventario[arg].quantidade >= qtd) {
+                        inventario[arg].quantidade -= qtd; money += (inventario[arg].preco * 0.6) * qtd;
+                        logTerminal(`Vendeu ${qtd} ${arg}`);
+                    } else logTerminal(`Falha ao vender ${arg}`, true);
+                } else logTerminal(`Comando inválido: ${cmd}`, true);
+                atual++; atualizarInfosTop(); atualizarValoresDinamicos();
+            }, 500);
+        }
+
+        // Navegação
+        function switchTab(t) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(t).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Init
+        atualizarInfosTop(); atualizarEstoqueGrid(); renderizarFila();
+    </script>
+</body>
+</html>
